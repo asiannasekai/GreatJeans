@@ -3,15 +3,12 @@ from __future__ import annotations
 import pandas as pd
 from pathlib import Path
 from typing import Dict, Any
-from .annotate_local import PGS_FILE
 
 
-def compute_bmi_pgs(df_variants: pd.DataFrame):
-    if not Path(PGS_FILE).exists():
+def compute_bmi_pgs(df_variants: pd.DataFrame, catalogs=None):
+    if not catalogs or catalogs.pgs.empty:
         return None
-    pgs_df = pd.read_csv(PGS_FILE)
-    if pgs_df.empty:
-        return None
+    pgs_df = catalogs.pgs
     geno_map = df_variants.set_index('rsid')['genotype'].to_dict()
     score = 0.0
     weight_sum = 0.0

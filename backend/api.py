@@ -96,12 +96,12 @@ def qc_metrics(df: pd.DataFrame, fmt: str):
     }
 
 
-def make_result_json(df: pd.DataFrame, fmt: str, run_traits: bool, run_protein: bool, run_pgs: bool):
-    ann_vars = annotate_variants(df)
+def make_result_json(df: pd.DataFrame, fmt: str, run_traits: bool, run_protein: bool, run_pgs: bool, target_rsid: str = None):
+    ann_vars = annotate_variants(df, catalogs)
     gw = genome_window(df)
-    traits = build_traits_section(df) if run_traits else []
-    protein = build_protein_block(df) if run_protein else None
-    pgs = compute_bmi_pgs(df) if run_pgs else None
+    traits = build_traits_section(df, catalogs) if run_traits else []
+    protein = build_protein_block(df, catalogs, target_rsid) if run_protein else None
+    pgs = compute_bmi_pgs(df, catalogs) if run_pgs else None
     result = {
         'qc': qc_metrics(df, fmt),
         'genome_window': gw,
@@ -147,7 +147,7 @@ async def analyze(body: AnalyzeBody, request: Request = None, demo: bool = False
         df, fmt = detect_and_parse(raw)
     except ValueError as e:
         raise HTTPException(status_code=400, detail={'error': str(e)})
-    result = make_result_json(df, fmt, body.run_traits, body.run_protein, body.run_pgs)
+    result = make_result_json(df, fmt, body.run_traits, body.run_protein, body.run_pgs, body.target_rsid)
     # mini_model injection
     try:
         if result.protein and result.protein.residues:
@@ -160,7 +160,7 @@ async def analyze(body: AnalyzeBody, request: Request = None, demo: bool = False
                     **ss
                 }
     except Exception as e:  # non-fatal
-        logger.warning(f"mini_model_inject_failed rsid={rsid0} err={e}")
+        logger.warning(f"mini_model_inject_failed err={e}")
     result = ensure_contract(result)
     logger.info(f"event=analyze_done upload_id={body.upload_id} fmt={result.qc['format']} n={result.qc['n_snps']} time_ms={(time.time()-t0)*1000:.1f}")
     return result
@@ -190,7 +190,7 @@ async def demo_result():
         {'rsid':'rs1042522','chrom':'chr17','pos':7676150,'genotype':'GG'},
         {'rsid':'rs4988235','chrom':'chr2','pos':136608646,'genotype':'CT'}
     ])
-    return make_result_json(df, '23andme', True, True, True)
+    return make_result_json(df, '23andme', True, True, True, None)
 
 
 @app.delete('/uploads/{upload_id}')
