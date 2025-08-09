@@ -1,0 +1,5 @@
+# This is a sample / truncated 23andMe-style file
+# rsid	chromosome	position	genotype
+rs1042522	chr17	7676150	GG
+rs4988235	chr2	136608646	CT
+rs602662	chr19	49206562	AG

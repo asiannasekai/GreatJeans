@@ -1,0 +1,15 @@
+[project]
+name = "greatjeans"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "pydantic",
+  "pandas",
+  "numpy",
+  "python-multipart",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

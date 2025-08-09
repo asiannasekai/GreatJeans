@@ -1,0 +1,14 @@
+{
+  "rs1042522": {
+    "wt_seq": "MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLS\n", 
+    "mut_seq": "MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLR\n", 
+    "center": 15, 
+    "length": 31
+  },
+  "rs671": {
+    "wt_seq": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 
+    "mut_seq": "AAAAAAAAAAAAAAAATAAAAAAAAAAAAAAA", 
+    "center": 15, 
+    "length": 31
+  }
+}

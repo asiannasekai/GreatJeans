@@ -1,0 +1,10 @@
+# This data file contains raw genotype data
+# Sample: DEMO_001
+# Format: rsid	chromosome	position	genotype
+# Build: hg38 (for demo purposes)
+rsid	chromosome	position	genotype
+rs1042522	chr17	7676150	GG
+rs4988235	chr2	136616646	CT
+rs762551	chr15	75038902	AA
+rs602662	chr19	49206674	GG
+rs334	chr11	5227002	AA

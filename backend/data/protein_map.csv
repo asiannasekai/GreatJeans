@@ -1,0 +1,2 @@
+rsid,gene,uniprot,residue_index,protein_change,alphafold_cif_url
+rs1042522,TP53,P04637,72,p.Pro72Arg,https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v4.cif
