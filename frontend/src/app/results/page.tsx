@@ -5,6 +5,7 @@ import { FileText, Download, Trash2 } from "lucide-react";
 import { ViewModeToggle } from "../../components/ViewModeToggle";
 import { OnboardingTour } from "../../components/OnboardingTour";
 import { GlossaryDrawer } from "../../components/GlossaryDrawer";
+import { ChatButton } from "../../components/ChatButton";
 import { ProteinCard } from "../../components/ProteinCard";
 import { SecondaryStructureCard } from "../../components/SecondaryStructureCard";
 import { GenomeCard } from "../../components/GenomeCard";
@@ -250,6 +251,7 @@ export default function ResultsPage() {
       {/* Global Components */}
       <OnboardingTour />
       <GlossaryDrawer />
+      <ChatButton />
     </div>
   );
 }

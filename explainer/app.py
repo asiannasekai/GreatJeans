@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Any, Optional
-from .llm_explainer import explain_with_llm
+from llm_explainer import explain_with_llm
 from dotenv import load_dotenv
 load_dotenv()
 
