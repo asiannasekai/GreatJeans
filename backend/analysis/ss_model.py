@@ -314,13 +314,13 @@ def predict_secondary_structure_esm_lite(wt_seq: str, mut_seq: str, data_dir: Pa
             'helix': round(wt_center['probs']['H'], 3),
             'sheet': round(wt_center['probs']['E'], 3),
             'coil': round(wt_center['probs']['C'], 3),
-            'confidence': round(wt_confidence, 3)
+            'confidence': round(float(wt_confidence), 3)
         },
         'mut': {
             'helix': round(mut_center['probs']['H'], 3),
             'sheet': round(mut_center['probs']['E'], 3), 
             'coil': round(mut_center['probs']['C'], 3),
-            'confidence': round(mut_confidence, 3)
+            'confidence': round(float(mut_confidence), 3)
         },
         'delta': delta,
         'per_residue': [
