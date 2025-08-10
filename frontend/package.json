@@ -18,7 +18,7 @@
     "autoprefixer": "^10.4.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.290.0",
-    "next": "14.0.4",
+    "next": "^14.2.31",
     "postcss": "^8.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

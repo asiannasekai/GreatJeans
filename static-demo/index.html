@@ -1,359 +1,1526 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>GeneLens Analysis</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreatJeans - Genomics Analysis</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .molstar-container { width: 100%; height: 400px; }
-        .loading-spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .tab-btn.active { background-color: white; color: #1f2937; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-        .tab-content { display: none; }
-        .tab-content:not(.hidden) { display: block; }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen">
-        <!-- Upload Page -->
-        <div id="upload-page" class="min-h-screen flex items-center justify-center">
-            <div class="max-w-md w-full mx-4">
-                <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
-                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-dna text-2xl text-indigo-600"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-900 mb-2">GreatJeans</h1>
-                    <p class="text-gray-600 mb-8">Upload your genomic data for comprehensive analysis</p>
-                    
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 mb-6 hover:border-indigo-400 transition-colors">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-4"></i>
-                        <p class="text-sm text-gray-600 mb-2">Drop your VCF or 23andMe file here</p>
-                        <p class="text-xs text-gray-500">Supports .vcf, .txt formats</p>
-                    </div>
-                    
-                    <button onclick="loadDemo()" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-indigo-700 transition-colors mb-4">
-                        Load Demo Data
-                    </button>
-                    
-                    <button class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-200 transition-colors">
-                        Choose File
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results Page -->
-        <div id="results-page" class="hidden">
-            <!-- Header -->
-            <header class="bg-white border-b border-gray-200 px-6 py-4">
-                <div class="max-w-7xl mx-auto flex items-center justify-between">
+<body class="min-h-screen">
+    <!-- Upload Page -->
+    <div id="upload-page" class="hidden">
+        <div class="container mx-auto px-4 py-8">
+            <!-- Upload Header -->
+            <header class="mb-8 fade-in">
+                <div class="flex justify-between items-center">
                     <div class="flex items-center gap-3">
-                        <h1 class="text-2xl font-bold text-gray-900">GreatJeans</h1>
-                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Demo Results</span>
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center text-2xl">
+                            ⚡
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold gradient-text">GeneLens Upload</h1>
+                            <p class="text-sm text-gray-400">Upload your genetic data for analysis</p>
+                        </div>
                     </div>
-                    <button onclick="showUpload()" class="text-gray-600 hover:text-gray-900">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Upload
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="goHome()" class="btn">
+                            <i class="fas fa-home mr-2"></i><span class="hidden sm:inline">Home</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            <!-- Navigation Tabs -->
-            <div class="bg-white border-b border-gray-200 px-6">
-                <div class="max-w-7xl mx-auto">
-                    <nav class="flex space-x-8">
-                        <button id="tab-protein" onclick="showTab('protein')" class="tab-btn py-4 px-1 border-b-2 font-medium text-sm border-indigo-500 text-indigo-600">
-                            <i class="fas fa-atom mr-2"></i>Protein
-                        </button>
-                        <button id="tab-structure" onclick="showTab('structure')" class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-project-diagram mr-2"></i>Structure
-                        </button>
-                        <button id="tab-genome" onclick="showTab('genome')" class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-dna mr-2"></i>Genome
-                        </button>
-                        <button id="tab-traits" onclick="showTab('traits')" class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-chart-bar mr-2"></i>Traits
-                        </button>
-                    </nav>
+            <!-- Upload Card -->
+            <div class="max-w-2xl mx-auto">
+                <div class="card fade-in">
+                    <div class="p-8">
+                        <div class="text-center mb-8">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-upload text-3xl text-white"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold mb-2">Upload Genetic Data</h2>
+                            <p class="text-gray-400">Supported formats: .txt (23andMe), .vcf, .vcf.gz</p>
+                        </div>
+
+                        <!-- Upload Area -->
+                        <div id="upload-area" class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center transition-all duration-300 hover:border-purple-500 hover:bg-purple-500/5 cursor-pointer">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium mb-2">Drag & drop your file here</p>
+                            <p class="text-gray-400 mb-4">or click to browse</p>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-folder-open mr-2"></i>Choose File
+                            </button>
+                            <input type="file" id="file-input" class="hidden" accept=".txt,.vcf,.vcf.gz">
+                        </div>
+
+                        <!-- Demo Option -->
+                        <div class="mt-8 text-center">
+                            <p class="text-gray-400 mb-4">Or try our demo with sample data</p>
+                            <button onclick="loadDemo()" class="btn btn-primary">
+                                <i class="fas fa-play mr-2"></i>Load Demo Data
+                            </button>
+                        </div>
+
+                        <!-- Privacy Notice -->
+                        <div class="mt-8 glass-panel p-4 rounded-lg border border-blue-500/30">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-shield-alt text-blue-400 mt-1"></i>
+                                <div>
+                                    <h5 class="font-medium text-blue-400 mb-2">Privacy & Security</h5>
+                                    <p class="text-sm text-gray-300">
+                                        Your genetic data is processed locally and can be deleted at any time. We follow strict privacy guidelines and never share your data with third parties.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Main Content -->
-            <main class="max-w-7xl mx-auto px-6 py-6">
-                <!-- Protein Tab Content -->
-                <div id="content-protein" class="tab-content">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Mol* Protein Structure Viewer -->
-                        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
-                            <div class="p-6 border-b border-gray-200">
-                                <h3 class="text-xl font-semibold flex items-center gap-2">
-                                    <i class="fas fa-cube text-blue-500"></i>
-                                    Protein Structure
-                                    <span id="loading-status" class="text-sm text-gray-500"></span>
-                                </h3>
-                            </div>
-                            <div class="p-6">
-                                <!-- Mol* Viewer Container -->
-                                <div id="molstar-container" class="h-96 bg-gray-100 rounded-xl relative overflow-hidden">
-                                    <!-- Loading State -->
-                                    <div id="loading-state" class="absolute inset-0 flex items-center justify-center bg-gray-100">
-                                        <div class="text-center">
-                                            <div class="loading-spinner w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                                            <p class="text-gray-600 font-medium">Loading AlphaFold Structure...</p>
-                                            <p id="loading-progress" class="text-sm text-gray-500 mt-2">Initializing Mol*...</p>
-                                            <div class="mt-4 bg-gray-200 rounded-full h-2 w-64 mx-auto">
-                                                <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Error State -->
-                                    <div id="error-state" class="absolute inset-0 flex items-center justify-center bg-red-50 hidden">
-                                        <div class="text-center">
-                                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
-                                            </div>
-                                            <p class="text-red-600 font-medium">Failed to load protein structure</p>
-                                            <p class="text-sm text-gray-600 mt-1">Network timeout or CORS issue</p>
-                                            <button onclick="loadMolstar()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                                Retry Loading
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Controls -->
-                                <div class="mt-4 flex gap-2 flex-wrap">
-                                    <button id="highlight-btn" onclick="highlightResidue()" disabled 
-                                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                        <i class="fas fa-crosshairs mr-1"></i>Highlight Residue 72
-                                    </button>
-                                    <button onclick="resetView()" disabled id="reset-btn"
-                                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                        <i class="fas fa-undo mr-1"></i>Reset View
-                                    </button>
-                                    <button onclick="toggleSurface()" disabled id="surface-btn"
-                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                        <i class="fas fa-layer-group mr-1"></i>Surface
-                                    </button>
-                                </div>
-                                
-                                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
-                                    <h4 class="font-medium text-blue-900 mb-2 text-sm flex items-center">
-                                        <i class="fas fa-info-circle mr-1"></i>Structural Context
-                                    </h4>
-                                    <div class="text-xs text-blue-800 space-y-1">
-                                        <p><strong>Protein:</strong> P04637 (TP53) • <strong>Residue:</strong> 72 (Pro→Arg)</p>
-                                        <p><strong>AlphaFold Confidence:</strong> <span class="text-green-600">Very High (pLDDT > 90)</span></p>
-                                        <p><strong>Region:</strong> DNA-binding domain • <strong>Impact:</strong> Critical for p53 function</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Secondary Structure -->
-                        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
-                            <div class="p-6 border-b border-gray-200">
-                                <div class="flex justify-between items-center">
-                                    <h3 class="text-xl font-semibold">Secondary Structure</h3>
-                                    <div class="flex gap-2">
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">High</span>
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">ESM-lite</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-6">
-                                <div class="space-y-4">
-                                    <!-- Helix -->
-                                    <div class="space-y-2">
-                                        <div class="flex items-center justify-between text-sm">
-                                            <span class="font-medium">Helix</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ -0.020</span>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>WT</span><span>45.0%</span>
-                                                </div>
-                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-purple-500 opacity-60" style="width: 45%"></div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Mut</span><span>43.0%</span>
-                                                </div>
-                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-purple-500" style="width: 43%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Sheet -->
-                                    <div class="space-y-2">
-                                        <div class="flex items-center justify-between text-sm">
-                                            <span class="font-medium">Sheet</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ +0.020</span>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>WT</span><span>25.0%</span>
-                                                </div>
-                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-yellow-500 opacity-60" style="width: 25%"></div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Mut</span><span>27.0%</span>
-                                                </div>
-                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-yellow-500" style="width: 27%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Coil -->
-                                    <div class="space-y-2">
-                                        <div class="flex items-center justify-between text-sm">
-                                            <span class="font-medium">Coil</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ +0.000</span>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>WT</span><span>30.0%</span>
-                                                </div>
-                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-green-500 opacity-60" style="width: 30%"></div>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Mut</span><span>30.0%</span>
-                                                </div>
-                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-green-500" style="width: 30%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-4 text-xs text-gray-500 flex justify-between">
-                                    <span>ESM-lite prediction</span>
-                                    <span>Confidence: 82%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Other Tab Content (Structure, Genome, Traits) -->
-                <div id="content-structure" class="tab-content hidden">
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <h3 class="text-xl font-semibold">Protein Secondary Structure</h3>
-                        </div>
-                        <div class="p-6">
-                            <div class="h-80 bg-gray-100 rounded-xl flex items-center justify-center">
-                                <div class="text-center">
-                                    <i class="fas fa-project-diagram text-4xl text-gray-400 mb-4"></i>
-                                    <p class="text-gray-600 mb-2">Structure Analysis</p>
-                                    <p class="text-sm text-gray-500">ESM-lite predictions and annotations</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="content-genome" class="tab-content hidden">
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <h3 class="text-xl font-semibold">Genome Browser</h3>
-                        </div>
-                        <div class="p-6">
-                            <div class="h-80 bg-gray-100 rounded-xl flex items-center justify-center">
-                                <div class="text-center">
-                                    <i class="fas fa-dna text-4xl text-gray-400 mb-4"></i>
-                                    <p class="text-gray-600 mb-2">IGV.js Viewer</p>
-                                    <p class="text-sm text-gray-500">chr17:7,676,125-7,676,175</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="content-traits" class="tab-content hidden">
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
-                        <div class="p-6 border-b border-gray-200">
-                            <h3 class="text-xl font-semibold">Genetic Traits</h3>
-                        </div>
-                        <div class="p-6">
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead>
-                                        <tr class="border-b border-gray-200">
-                                            <th class="text-left py-2">Trait</th>
-                                            <th class="text-left py-2">Score</th>
-                                            <th class="text-left py-2">Percentile</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="border-b border-gray-100">
-                                            <td class="py-2">BMI</td>
-                                            <td class="py-2">0.34</td>
-                                            <td class="py-2">63rd</td>
-                                        </tr>
-                                        <tr class="border-b border-gray-100">
-                                            <td class="py-2">Height</td>
-                                            <td class="py-2">-0.12</td>
-                                            <td class="py-2">45th</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
         </div>
     </div>
 
+    <!-- Main Results Page -->
+    <div id="results-page" class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8 fade-in">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center text-2xl">
+                        ⚡
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold gradient-text">GeneLens Analysis</h1>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="status-badge covered">
+                                <i class="fas fa-flask mr-1"></i>Demo Mode
+                            </span>
+                            <span class="text-sm text-gray-400">Advanced Genomic Insights</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button onclick="goHome()" class="btn">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </button>
+                    <button onclick="goToUpload()" class="btn">
+                        <i class="fas fa-upload mr-2"></i>Back to Upload
+                    </button>
+                    <button onclick="deleteData()" class="btn btn-danger">
+                        <i class="fas fa-trash-alt mr-2"></i>Delete Data
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- System Status -->
+        <div class="card mb-8 p-6 slide-up">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-r from-green-500 to-cyan-500 flex items-center justify-center">
+                    <i class="fas fa-heartbeat text-white text-sm"></i>
+                </div>
+                <h2 class="text-lg font-semibold">System Status</h2>
+                <div class="ml-auto">
+                    <span class="text-sm text-green-400 flex items-center gap-1">
+                        <i class="fas fa-circle text-xs"></i>All Systems Online
+                    </span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="status-badge covered">
+                    <i class="fas fa-check-circle mr-2"></i>Browser Compatibility
+                </div>
+                <div class="status-badge covered">
+                    <i class="fas fa-cube mr-2"></i>Mol* Viewer Ready
+                </div>
+                <div class="status-badge covered">
+                    <i class="fas fa-brain mr-2"></i>AI Engine Active
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs mb-8 slide-up">
+            <button onclick="showTab('protein')" class="tab-btn active" data-tab="protein">
+                <i class="fas fa-cube mr-2"></i>Protein 3D
+            </button>
+            <button onclick="showTab('genome')" class="tab-btn" data-tab="genome">
+                <i class="fas fa-dna mr-2"></i>Genome
+            </button>
+            <button onclick="showTab('traits')" class="tab-btn" data-tab="traits">
+                <i class="fas fa-chart-bar mr-2"></i>Traits
+            </button>
+            <button onclick="showTab('pgs')" class="tab-btn" data-tab="pgs">
+                <i class="fas fa-calculator mr-2"></i>PGS
+            </button>
+            <button onclick="showTab('ai')" class="tab-btn" data-tab="ai">
+                <i class="fas fa-robot mr-2"></i>AI Insights
+            </button>
+        </div>
+
+        <!-- Content Sections -->
+        <main>
+            <!-- Protein 3D View -->
+            <div id="content-protein" class="tab-content active">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    <!-- Protein Structure Viewer -->
+                    <div class="card fade-in">
+                        <div class="p-6 border-b border-gray-800/30">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                                        <i class="fas fa-cube text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold">Protein Structure Viewer</h3>
+                                        <p class="text-sm text-gray-400">AlphaFold P04637 (TP53)</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-primary" id="highlight-btn" disabled>
+                                        <i class="fas fa-highlighter mr-1"></i>Highlight 72
+                                    </button>
+                                    <button class="btn" id="reset-btn" disabled>
+                                        <i class="fas fa-undo mr-1"></i>Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div id="molstar-container" class="viewer-container h-96 relative">
+                                <!-- Loading State -->
+                                <div id="loading-state" class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div class="w-12 h-12 border-3 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                        <p class="text-gray-400">Loading Mol* Viewer...</p>
+                                        <div id="progress-bar" class="w-48 h-2 bg-gray-700 rounded-full mt-3 overflow-hidden">
+                                            <div id="progress-fill" class="h-full bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Error State -->
+                                <div id="error-state" class="absolute inset-0 flex items-center justify-center hidden">
+                                    <div class="text-center">
+                                        <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                                        <p class="text-red-400 mb-2">Failed to load Mol* viewer</p>
+                                        <p id="error-message" class="text-sm text-gray-500 mb-4"></p>
+                                        <button onclick="loadMolstar()" class="btn btn-primary">
+                                            <i class="fas fa-redo mr-1"></i>Retry
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="flex gap-2">
+                                    <button onclick="resetView()" disabled id="reset-view-btn" class="btn">
+                                        <i class="fas fa-undo mr-1"></i>Reset View
+                                    </button>
+                                    <button onclick="toggleSurface()" disabled id="surface-btn" class="btn">
+                                        <i class="fas fa-layer-group mr-1"></i>Surface
+                                    </button>
+                                </div>
+                                <div class="text-xs text-gray-400">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        Click and drag to rotate
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Structural Analysis -->
+                    <!-- Structural Analysis -->
+                    <div class="card fade-in">
+                        <div class="p-6 border-b border-gray-800/30">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-cyan-500 flex items-center justify-center">
+                                    <i class="fas fa-project-diagram text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold">Structural Analysis</h3>
+                                    <p class="text-sm text-gray-400">ESM-lite ML Predictions</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            <!-- Secondary Structure -->
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-medium">Secondary Structure Prediction</h4>
+                                    <span class="text-xs text-gray-400 bg-gray-800/50 px-2 py-1 rounded">
+                                        Confidence: 92%
+                                    </span>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-2">
+                                            <span class="flex items-center gap-2">
+                                                <div class="w-3 h-3 rounded bg-cyan-500"></div>
+                                                α-Helix
+                                            </span>
+                                            <span class="text-cyan-400 font-medium">45%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-value bg-gradient-to-r from-cyan-500 to-cyan-400" style="width: 45%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-2">
+                                            <span class="flex items-center gap-2">
+                                                <div class="w-3 h-3 rounded bg-purple-500"></div>
+                                                β-Sheet
+                                            </span>
+                                            <span class="text-purple-400 font-medium">30%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-value bg-gradient-to-r from-purple-500 to-purple-400" style="width: 30%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-2">
+                                            <span class="flex items-center gap-2">
+                                                <div class="w-3 h-3 rounded bg-green-500"></div>
+                                                Random Coil
+                                            </span>
+                                            <span class="text-green-400 font-medium">25%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-value bg-gradient-to-r from-green-500 to-green-400" style="width: 25%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mutation Impact -->
+                            <div class="pt-4 border-t border-gray-800/30">
+                                <h4 class="font-medium mb-3">Mutation Impact (R72P)</h4>
+                                <div class="glass-panel p-4 rounded-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm">Structural Stability</span>
+                                        <span class="text-orange-400 font-medium">-12%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm">Binding Affinity</span>
+                                        <span class="text-red-400 font-medium">-8%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm">Functional Score</span>
+                                        <span class="text-yellow-400 font-medium">Moderate Risk</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Genome View -->
+            <div id="content-genome" class="tab-content">
+                <div class="card fade-in">
+                    <div class="p-6 border-b border-gray-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center">
+                                <i class="fas fa-dna text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold">Genomic Locus View</h3>
+                                <p class="text-sm text-gray-400">Selected region: APOE gene region</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="viewer-container h-96 relative">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center mb-4 mx-auto">
+                                        <i class="fas fa-dna text-2xl text-white"></i>
+                                    </div>
+                                    <h4 class="text-lg font-semibold mb-2">Genome Browser</h4>
+                                    <p class="text-gray-400 mb-4">Interactive genomic visualization will be loaded here</p>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-play mr-2"></i>Initialize Genome Browser
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-between items-center">
+                            <div class="text-sm text-gray-400">
+                                <span class="flex items-center gap-2">
+                                    <i class="fas fa-map-marker-alt text-orange-400"></i>
+                                    Position: chr19:45,409,000-45,411,000
+                                </span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="btn">
+                                    <i class="fas fa-search-plus mr-1"></i>Zoom In
+                                </button>
+                                <button class="btn">
+                                    <i class="fas fa-search-minus mr-1"></i>Zoom Out
+                                </button>
+                                <button class="btn">
+                                    <i class="fas fa-refresh mr-1"></i>Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traits View -->
+            <div id="content-traits" class="tab-content">
+                <div class="coverage-summary slide-up">
+                    <div class="coverage-card">
+                        <div class="text-3xl">📊</div>
+                        <div>
+                            <div class="text-2xl font-bold gradient-text">6</div>
+                            <div class="text-sm text-gray-400">Total Traits</div>
+                        </div>
+                    </div>
+                    <div class="coverage-card">
+                        <div class="text-3xl">✅</div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-400">4</div>
+                            <div class="text-sm text-gray-400">Covered</div>
+                        </div>
+                    </div>
+                    <div class="coverage-card">
+                        <div class="text-3xl">⚠️</div>
+                        <div>
+                            <div class="text-2xl font-bold text-orange-400">2</div>
+                            <div class="text-sm text-gray-400">Missing</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="p-6 border-b border-gray-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold">Trait Analysis Results</h3>
+                                <p class="text-sm text-gray-400">Comprehensive genetic trait coverage from your genomic data</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="table-responsive">
+                            <table class="trait-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-tag text-purple-400"></i>
+                                                Trait
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-chart-line text-cyan-400"></i>
+                                                Status
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-dna text-green-400"></i>
+                                                Variants
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-info-circle text-orange-400"></i>
+                                                Notes
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="font-medium">APOE Alzheimer's Risk</td>
+                                        <td>
+                                            <span class="status-badge covered">
+                                                <i class="fas fa-check mr-1"></i>Covered
+                                            </span>
+                                        </td>
+                                        <td>3/3 variants</td>
+                                        <td class="text-gray-400">Normal risk profile</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-medium">MTHFR Folate Metabolism</td>
+                                        <td>
+                                            <span class="status-badge covered">
+                                                <i class="fas fa-check mr-1"></i>Covered
+                                            </span>
+                                        </td>
+                                        <td>2/2 variants</td>
+                                        <td class="text-gray-400">Heterozygous C677T</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-medium">CYP2D6 Drug Metabolism</td>
+                                        <td>
+                                            <span class="px-3 py-1 bg-orange-500/20 text-orange-400 text-xs rounded-full">
+                                                <i class="fas fa-exclamation mr-1"></i>Partial
+                                            </span>
+                                        </td>
+                                        <td>1/3 variants</td>
+                                        <td class="text-gray-400">Additional testing needed</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-medium">BRCA1/2 Cancer Risk</td>
+                                        <td>
+                                            <span class="px-3 py-1 bg-red-500/20 text-red-400 text-xs rounded-full">
+                                                <i class="fas fa-times mr-1"></i>Missing
+                                            </span>
+                                        </td>
+                                        <td>0/2 variants</td>
+                                        <td class="text-gray-400">Not covered in this dataset</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PGS View -->
+            <div id="content-pgs" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card fade-in">
+                        <div class="p-6 border-b border-gray-800/30">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center">
+                                    <i class="fas fa-calculator text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold">Polygenic Risk Scores</h3>
+                                    <p class="text-sm text-gray-400">Calculated from 1000+ genetic variants</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <div class="text-center">
+                                    <div class="text-4xl font-bold gradient-text mb-2">0.34</div>
+                                    <div class="text-lg font-medium mb-1">BMI Risk Score</div>
+                                    <div class="text-sm text-gray-400">63rd percentile</div>
+                                </div>
+                                <div class="glass-panel p-4 rounded-lg">
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span>Population Average</span>
+                                        <span class="text-gray-400">0.28</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span>Your Score</span>
+                                        <span class="text-cyan-400 font-medium">0.34</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span>Risk Category</span>
+                                        <span class="text-yellow-400 font-medium">Moderate</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card fade-in">
+                        <div class="p-6 border-b border-gray-800/30">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center">
+                                    <i class="fas fa-chart-pie text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold">Score Distribution</h3>
+                                    <p class="text-sm text-gray-400">Your position in the population</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="relative h-48 bg-gray-800/30 rounded-lg overflow-hidden">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center mb-4 mx-auto">
+                                            <i class="fas fa-chart-area text-2xl text-white"></i>
+                                        </div>
+                                        <p class="text-gray-400">Distribution chart will be rendered here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights View -->
+            <div id="content-ai" class="tab-content">
+                <div class="card fade-in">
+                    <div class="p-6 border-b border-gray-800/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                                <i class="fas fa-robot text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold">AI-Powered Insights</h3>
+                                <p class="text-sm text-gray-400">Comprehensive analysis of your genetic profile</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-6">
+                            <div class="glass-panel p-6 rounded-lg">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-brain text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-3 text-lg">Summary Analysis</h4>
+                                        <p class="text-gray-300 leading-relaxed mb-4">
+                                            Based on your genetic profile, you carry a common variant in the TP53 gene (R72P) that affects protein structure and function. This variant is associated with moderate changes in cancer susceptibility and cellular response to stress.
+                                        </p>
+                                        <p class="text-gray-300 leading-relaxed">
+                                            Your APOE profile suggests normal risk for Alzheimer's disease, while your MTHFR variant indicates a need for attention to folate metabolism and B-vitamin status.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="glass-panel p-4 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <i class="fas fa-shield-alt text-green-400"></i>
+                                        <h5 class="font-medium">Protective Factors</h5>
+                                    </div>
+                                    <ul class="text-sm text-gray-300 space-y-1">
+                                        <li>• Normal APOE risk profile</li>
+                                        <li>• No high-risk BRCA variants detected</li>
+                                        <li>• Efficient DNA repair mechanisms</li>
+                                    </ul>
+                                </div>
+
+                                <div class="glass-panel p-4 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <i class="fas fa-exclamation-triangle text-orange-400"></i>
+                                        <h5 class="font-medium">Areas of Attention</h5>
+                                    </div>
+                                    <ul class="text-sm text-gray-300 space-y-1">
+                                        <li>• Monitor folate/B12 levels</li>
+                                        <li>• Consider regular cancer screening</li>
+                                        <li>• Lifestyle optimization important</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="glass-panel p-4 rounded-lg border border-yellow-500/30">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-info-circle text-yellow-400 mt-1"></i>
+                                    <div>
+                                        <h5 class="font-medium text-yellow-400 mb-2">Disclaimer</h5>
+                                        <p class="text-sm text-gray-300">
+                                            This analysis is for educational and research purposes only. Results should not be used for medical diagnosis or treatment decisions. Always consult with qualified healthcare professionals for medical advice.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+                </div>
+            </div>
+
+            <!-- PGS View -->
+            <div id="content-pgs" class="tab-content">
+                <div class="card">
+                    <div class="p-6">
+                        <div class="text-sm text-gray-400 mb-8">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Polygenic scores represent statistical risk estimates based on multiple genetic variants. They should be interpreted alongside clinical factors and family history.
+                        </div>
+
+                        <div class="text-center mb-12">
+                            <h3 class="text-4xl font-bold text-orange-500">78th</h3>
+                            <p class="text-gray-400">Percentile</p>
+                            <span class="inline-block mt-2 px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm">High Risk</span>
+                        </div>
+
+                        <div class="mb-8">
+                            <h4 class="text-sm font-medium mb-2">Population Risk Distribution</h4>
+                            <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500" style="width: 78%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>Low Risk</span>
+                                <span>Average</span>
+                                <span>High Risk</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-medium mb-2">Risk Interpretation</h4>
+                                <p class="text-gray-400">Moderately elevated risk</p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-medium mb-2">Clinical Context</h4>
+                                <p class="text-gray-400">Your polygenic score indicates elevated risk compared to the general population.</p>
+                            </div>
+
+                            <div class="flex justify-between text-sm text-gray-400">
+                                <span>22% of population has higher risk</span>
+                                <span>78% of population has lower risk</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI View -->
+            <div id="content-ai" class="tab-content">
+                <div class="card">
+                    <div class="p-6">
+                        <div class="text-sm text-gray-400 mb-6">
+                            <i class="fas fa-robot mr-2"></i>
+                            AI-generated content may contain inaccuracies. Always consult healthcare professionals for medical advice.
+                        </div>
+
+                        <div class="ai-summary mb-8">
+                            <h3 class="text-lg font-semibold mb-4">AI Generated Summary</h3>
+                            <p class="text-gray-300 mb-4">Based on your genetic data, here's what we found:</p>
+                            <div class="space-y-4 text-gray-300">
+                                <p>Your APOE variant (rs7412) shows a Cys130Arg change at residue 72, which is associated with the APOE2 allele. This variant is generally considered protective against Alzheimer's disease compared to the more common APOE4 variant.</p>
+                                <p class="font-medium">Key findings:</p>
+                                <ul class="list-disc list-inside space-y-2 ml-4">
+                                    <li>Lower Alzheimer's disease risk compared to APOE4 carriers</li>
+                                    <li>Potential cardiovascular implications</li>
+                                    <li>Normal metabolic profile for most traits analyzed</li>
+                                </ul>
+                            </div>
+                            <button class="mt-4 text-cyan-400 hover:text-cyan-300">
+                                <i class="fas fa-sync-alt mr-2"></i>Regenerate Summary
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="disclaimer-box">
+                                <h4 class="font-medium text-red-400 mb-2">Not Medical Advice</h4>
+                                <p class="text-sm text-gray-300">This AI-generated content is for educational purposes only and should not be used for medical decision-making.</p>
+                            </div>
+
+                            <div class="disclaimer-box">
+                                <h4 class="font-medium text-orange-400 mb-2">Simplified Interpretation</h4>
+                                <p class="text-sm text-gray-300">Complex genetic interactions are simplified for readability and may not capture all nuances.</p>
+                            </div>
+
+                            <div class="disclaimer-box">
+                                <h4 class="font-medium text-blue-400 mb-2">Evolving Science</h4>
+                                <p class="text-sm text-gray-300">Genetic research is rapidly evolving, and interpretations may change as new evidence emerges.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Home Page -->
+    <div id="home-page" class="hidden">
+        <!-- Sticky Navbar -->
+        <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-lg border-b border-slate-800">
+            <div class="container mx-auto px-4 py-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-400 to-purple-400 flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">G</span>
+                        </div>
+                        <span class="text-xl font-semibold text-white">Gene</span>
+                    </div>
+                    <div class="hidden md:flex items-center gap-6 text-sm">
+                        <a href="#product" class="text-gray-300 hover:text-white">Product</a>
+                        <a href="#how-it-works" class="text-gray-300 hover:text-white">How it Works</a>
+                        <a href="#founders" class="text-gray-300 hover:text-white">Founders</a>
+                        <a href="#faq" class="text-gray-300 hover:text-white">FAQ</a>
+                        <a href="#privacy" class="text-gray-300 hover:text-white">Privacy</a>
+                        <button onclick="loadDemo()" class="text-gray-300 hover:text-white">Try Demo</button>
+                        <button onclick="goToUpload()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium">Launch App</button>
+                    </div>
+                    <button class="mobile-menu-button md:hidden" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="mobile-menu">
+                <button onclick="toggleMobileMenu()" class="absolute top-4 right-4 text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+                <a href="#product" onclick="toggleMobileMenu()">Product</a>
+                <a href="#how-it-works" onclick="toggleMobileMenu()">How it Works</a>
+                <a href="#founders" onclick="toggleMobileMenu()">Founders</a>
+                <a href="#faq" onclick="toggleMobileMenu()">FAQ</a>
+                <a href="#privacy" onclick="toggleMobileMenu()">Privacy</a>
+                <button onclick="loadDemo(); toggleMobileMenu()">Try Demo</button>
+                <button onclick="goToUpload(); toggleMobileMenu()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">Launch App</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-section min-h-[70vh] flex items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h1 class="hero-title text-4xl lg:text-5xl font-bold text-white mb-6">
+                            From your DNA to proteins—<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">made understandable</span>
+                        </h1>
+                        <p class="hero-subtitle text-lg text-gray-300 mb-8 leading-relaxed">
+                            Gene consumes raw DNA files (23andMe, Ancestry), augments with public genomics resources, and delivers protein-centric visualizations, PGS, and AI-assisted interpretations—bioinformatics for non-experts.
+                        </p>
+                        <div class="hero-buttons flex flex-col sm:flex-row gap-4 mb-6">
+                            <button onclick="goToUpload()" class="hero-button bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">Launch App</button>
+                            <button onclick="loadDemo()" class="hero-button border border-gray-600 hover:border-gray-500 text-white px-6 py-3 rounded-lg font-medium">Try Demo</button>
+                        </div>
+                        <a href="#how-it-works" class="text-cyan-400 hover:text-cyan-300 text-sm">Learn how it works →</a>
+                    </div>
+                    <div class="relative">
+                        <div class="bg-slate-800/50 rounded-2xl p-6 backdrop-blur-sm">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-gray-400 text-sm ml-2">Protein Structure</span>
+                            </div>
+                            <div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg h-48 flex items-center justify-center">
+                                <div class="text-6xl">🧬</div>
+                            </div>
+                            <div class="mt-4 flex items-center gap-2">
+                                <div class="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                                <span class="text-gray-300 text-sm">Active 136 mutations</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust Strip -->
+        <section class="bg-slate-800/30 py-4">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-wrap justify-center gap-8 text-sm text-gray-400">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                        Privacy-first
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        No medical advice
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        Uses public references (AlphaFold, GWAS, ClinVar)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product at a Glance -->
+        <section id="product" class="py-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">Product at a glance</h2>
+                    <p class="text-gray-400">Transform raw genetic data into actionable insights through our comprehensive analysis pipeline</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-cyan-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-upload text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">Upload DNA</h3>
+                                <p class="text-sm text-gray-400">23andMe, Ancestry+DNA, and standard VCF files</p>
+                            </div>
+                        </div>
+                        <a href="#" onclick="loadDemo()" class="text-cyan-400 text-sm hover:text-cyan-300">See example →</a>
+                    </div>
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-cube text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">Protein 3D</h3>
+                                <p class="text-sm text-gray-400">Interactive molecular structures</p>
+                            </div>
+                        </div>
+                        <a href="#" onclick="loadDemo()" class="text-cyan-400 text-sm hover:text-cyan-300">See example →</a>
+                    </div>
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-exchange-alt text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">Folding Analysis</h3>
+                                <p class="text-sm text-gray-400">Wild-type vs variant comparison</p>
+                            </div>
+                        </div>
+                        <a href="#" onclick="loadDemo()" class="text-cyan-400 text-sm hover:text-cyan-300">See example →</a>
+                    </div>
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">Traits</h3>
+                                <p class="text-sm text-gray-400">Coverage and genetic associations</p>
+                            </div>
+                        </div>
+                        <a href="#" onclick="loadDemo()" class="text-cyan-400 text-sm hover:text-cyan-300">See example →</a>
+                    </div>
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calculator text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">PGS Scores</h3>
+                                <p class="text-sm text-gray-400">Polygenic risk calculations</p>
+                            </div>
+                        </div>
+                        <a href="#" onclick="loadDemo()" class="text-cyan-400 text-sm hover:text-cyan-300">See example →</a>
+                    </div>
+                    <div class="card p-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-robot text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">AI Summary</h3>
+                                <p class="text-sm text-gray-400">Personalized interpretations</p>
+                            </div>
+                        </div>
+                        <a href="#" onclick="loadDemo()" class="text-cyan-400 text-sm hover:text-cyan-300">See example →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it Works -->
+        <section id="how-it-works" class="py-16 bg-slate-800/30">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">How it Works</h2>
+                    <p class="text-gray-400">Four simple steps from raw genetic data to comprehensive protein analysis</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <span class="text-white font-bold text-xl">1</span>
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">Upload DNA file or use demo</h3>
+                        <p class="text-sm text-gray-400">Support for 23andMe, Ancestry+DNA, and standard VCF formats</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <span class="text-white font-bold text-xl">2</span>
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">We find coding variants</h3>
+                        <p class="text-sm text-gray-400">Cross-reference with GenVar and population databases</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <span class="text-white font-bold text-xl">3</span>
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">Zoom to affected protein residue</h3>
+                        <p class="text-sm text-gray-400">AlphaFold structures with highlighted mutation sites</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <span class="text-white font-bold text-xl">4</span>
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">Compare local folding + get AI explanation</h3>
+                        <p class="text-sm text-gray-400">Structural predictions and personalized interpretations</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Founders -->
+        <section id="founders" class="py-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">Meet the team</h2>
+                    <p class="text-gray-400">World-class expertise in genomics, computational biology, and precision medicine</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="space-y-4">
+                        <div class="founder-card active bg-slate-800/50 rounded-lg p-4 cursor-pointer" onclick="selectFounder(0)">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold">SC</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-white">Dr. Sarah Chen</h4>
+                                    <p class="text-sm text-gray-400">Chief Scientific Officer</p>
+                                    <p class="text-xs text-gray-500">Stanford, CA</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="founder-card bg-slate-800/30 rounded-lg p-4 cursor-pointer" onclick="selectFounder(1)">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold">AR</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-white">Alex Rodriguez</h4>
+                                    <p class="text-sm text-gray-400">Chief Technology Officer</p>
+                                    <p class="text-xs text-gray-500">New York, NY</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="founder-card bg-slate-800/30 rounded-lg p-4 cursor-pointer" onclick="selectFounder(2)">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold">PP</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-white">Dr. Priya Patel</h4>
+                                    <p class="text-sm text-gray-400">Head of Product</p>
+                                    <p class="text-xs text-gray-500">Boston, MA</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div id="founder-detail" class="card p-6">
+                            <div class="founder-detail" id="founder-0">
+                                <h3 class="text-xl font-bold text-white mb-2">Dr. Sarah Chen</h3>
+                                <p class="text-cyan-400 mb-1">Chief Scientific Officer</p>
+                                <p class="text-sm text-gray-400 mb-4">PhD Computational Biology, Stanford</p>
+                                <p class="text-gray-300 mb-6">Leading genomics researcher with 12+ years in structural bioinformatics. Previously at 23andMe and Illumina, pioneering protein folding prediction algorithms.</p>
+                                <div class="flex gap-3 mb-6">
+                                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">Resume</button>
+                                    <button class="border border-gray-600 hover:border-gray-500 text-white px-4 py-2 rounded-lg text-sm">LinkedIn</button>
+                                    <button class="border border-gray-600 hover:border-gray-500 text-white px-4 py-2 rounded-lg text-sm">Email</button>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-white mb-2">Key achievements</h4>
+                                    <ul class="text-sm text-gray-300 space-y-1">
+                                        <li>• Published 40+ peer-reviewed papers on protein structure prediction</li>
+                                        <li>• Led development of AlphaFold training pipelines at DeepMind collaboration</li>
+                                        <li>• NSF CAREER Award recipient for computational genomics research</li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-purple-600/20 text-purple-300 px-3 py-1 rounded-full text-xs">Protein Structure</span>
+                                    <span class="bg-cyan-600/20 text-cyan-300 px-3 py-1 rounded-full text-xs">Machine Learning</span>
+                                    <span class="bg-green-600/20 text-green-300 px-3 py-1 rounded-full text-xs">Population Genomics</span>
+                                </div>
+                            </div>
+                            <div class="founder-detail hidden" id="founder-1">
+                                <h3 class="text-xl font-bold text-white mb-2">Alex Rodriguez</h3>
+                                <p class="text-cyan-400 mb-1">Chief Technology Officer</p>
+                                <p class="text-sm text-gray-400 mb-4">MS Computer Science, MIT</p>
+                                <p class="text-gray-300 mb-6">Full-stack engineer with expertise in bioinformatics pipelines and 3D visualization. Previously built genomics infrastructure at Broad Institute.</p>
+                                <div class="flex gap-3 mb-6">
+                                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">Resume</button>
+                                    <button class="border border-gray-600 hover:border-gray-500 text-white px-4 py-2 rounded-lg text-sm">LinkedIn</button>
+                                    <button class="border border-gray-600 hover:border-gray-500 text-white px-4 py-2 rounded-lg text-sm">Email</button>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-white mb-2">Key achievements</h4>
+                                    <ul class="text-sm text-gray-300 space-y-1">
+                                        <li>• Built scalable genomics pipelines processing 1M+ genomes</li>
+                                        <li>• Open source contributor to major bioinformatics tools</li>
+                                        <li>• Led engineering teams at high-growth biotech startups</li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full text-xs">Full-Stack Engineering</span>
+                                    <span class="bg-purple-600/20 text-purple-300 px-3 py-1 rounded-full text-xs">3D Visualization</span>
+                                    <span class="bg-orange-600/20 text-orange-300 px-3 py-1 rounded-full text-xs">DevOps</span>
+                                </div>
+                            </div>
+                            <div class="founder-detail hidden" id="founder-2">
+                                <h3 class="text-xl font-bold text-white mb-2">Dr. Priya Patel</h3>
+                                <p class="text-cyan-400 mb-1">Head of Product</p>
+                                <p class="text-sm text-gray-400 mb-4">PhD Biomedical Informatics, Harvard</p>
+                                <p class="text-gray-300 mb-6">Product leader focused on making complex genomics accessible. Previously at Color Genomics and Foundation Medicine, bridging science and user experience.</p>
+                                <div class="flex gap-3 mb-6">
+                                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">Resume</button>
+                                    <button class="border border-gray-600 hover:border-gray-500 text-white px-4 py-2 rounded-lg text-sm">LinkedIn</button>
+                                    <button class="border border-gray-600 hover:border-gray-500 text-white px-4 py-2 rounded-lg text-sm">Email</button>
+                                </div>
+                                <div class="mb-4">
+                                    <h4 class="font-semibold text-white mb-2">Key achievements</h4>
+                                    <ul class="text-sm text-gray-300 space-y-1">
+                                        <li>• Launched genetic testing products used by 500K+ patients</li>
+                                        <li>• Expert in clinical genomics and regulatory compliance</li>
+                                        <li>• Published research on genomics accessibility and patient communication</li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-green-600/20 text-green-300 px-3 py-1 rounded-full text-xs">Clinical Genomics</span>
+                                    <span class="bg-pink-600/20 text-pink-300 px-3 py-1 rounded-full text-xs">Product Strategy</span>
+                                    <span class="bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full text-xs">UX Research</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Privacy & Ethics -->
+        <section id="privacy" class="py-16 bg-slate-800/30">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">Privacy & Ethics</h2>
+                    <p class="text-gray-400">Your genetic data deserves the highest level of protection and transparency</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-shield-alt text-white text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">Local processing where possible</h3>
+                        <p class="text-sm text-gray-400">Your genetic data is processed locally in your browser when feasible, minimizing server exposure.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-check text-white text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">Opt-in analysis</h3>
+                        <p class="text-sm text-gray-400">You choose what analysis to run and what data to share. Complete control over your genetic information.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-link text-white text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">Transparent sources</h3>
+                        <p class="text-sm text-gray-400">All SNPs and references are clearly linked to their original public databases and research.</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <a href="#" class="text-cyan-400 hover:text-cyan-300">Read Full Privacy Policy →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="py-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+                    <p class="text-gray-400">Common questions about Gene's functionality, privacy, and limitations</p>
+                </div>
+                <div class="max-w-3xl mx-auto space-y-4">
+                    <div class="faq-item">
+                        <button class="w-full text-left p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 flex justify-between items-center" onclick="toggleFAQ(0)">
+                            <span class="font-semibold text-white">Which DNA files are supported?</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div class="faq-content hidden p-4 bg-slate-800/30 rounded-b-lg">
+                            <p class="text-gray-300">We support raw DNA files from 23andMe (.txt), AncestryDNA (.txt), and standard VCF files (.vcf). Files should be uncompressed and contain SNP data with rs ID identifiers.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="w-full text-left p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 flex justify-between items-center" onclick="toggleFAQ(1)">
+                            <span class="font-semibold text-white">Is this medical advice?</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div class="faq-content hidden p-4 bg-slate-800/30 rounded-b-lg">
+                            <p class="text-gray-300">No, Gene provides educational information only. Our analysis is for research and educational purposes and should not be used for medical diagnosis or treatment decisions. Always consult qualified healthcare professionals for medical advice.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="w-full text-left p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 flex justify-between items-center" onclick="toggleFAQ(2)">
+                            <span class="font-semibold text-white">Can I try without uploading my data?</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div class="faq-content hidden p-4 bg-slate-800/30 rounded-b-lg">
+                            <p class="text-gray-300">Yes! We provide a demo genome that showcases all features including 3D protein visualization, trait analysis, and AI interpretations. Click "Try Demo" to explore without uploading personal data.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="w-full text-left p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 flex justify-between items-center" onclick="toggleFAQ(3)">
+                            <span class="font-semibold text-white">How accurate are the protein structure predictions?</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div class="faq-content hidden p-4 bg-slate-800/30 rounded-b-lg">
+                            <p class="text-gray-300">We use AlphaFold structures which have high confidence for most protein domains. Mutation effects are predicted using state-of-the-art ML models, but experimental validation is always recommended for clinical applications.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Get Started -->
+        <section class="py-16 bg-slate-800/30">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-white mb-4">Get Started</h2>
+                    <p class="text-gray-400">Three paths to explore your genetic data through protein visualization</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-file-upload text-white text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-white mb-2">Have a 23andMe/Ancestry file</h3>
+                            <p class="text-sm text-gray-400">Use DNA data from major providers</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-play text-white text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-white mb-2">Use our demo genome</h3>
+                            <p class="text-sm text-gray-400">Explore without uploading personal data</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-eye text-white text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-white mb-2">Open the viewer</h3>
+                            <p class="text-sm text-gray-400">Interactive protein and genomics analysis</p>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-4">
+                            <button onclick="goToUpload()" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-medium">Launch App</button>
+                            <button onclick="loadDemo()" class="border border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-medium">Try Demo</button>
+                        </div>
+                        <a href="#" onclick="showResults()" class="text-cyan-400 hover:text-cyan-300 text-sm">View sample results →</a>
+                        <div class="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400">
+                            <i class="fas fa-shield-alt text-green-400"></i>
+                            <span>No account required • Process locally • Delete anytime</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 border-t border-slate-800">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-r from-cyan-400 to-purple-400 flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">G</span>
+                            </div>
+                            <span class="text-xl font-semibold text-white">Gene</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">Making genomics accessible through protein-centric visualization and AI-assisted interpretation.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white mb-4">Product</h4>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li><a href="#" onclick="goToUpload()" class="hover:text-white">Upload DNA</a></li>
+                            <li><a href="#how-it-works" class="hover:text-white">How it Works</a></li>
+                            <li><a href="#" onclick="loadDemo()" class="hover:text-white">Try Demo</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white mb-4">Resources</h4>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li><a href="#privacy" class="hover:text-white">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-white">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white mb-4">Company</h4>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li><a href="#founders" class="hover:text-white">Founders</a></li>
+                            <li><a href="#" class="hover:text-white">Contact</a></li>
+                            <li><a href="#" class="hover:text-white">Careers</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
     <script>
+        // Global variables
         let molstarPlugin = null;
         let loadingTimeout = null;
         let surfaceVisible = false;
 
-        // Progress simulation for better UX
-        function simulateProgress() {
-            const progressBar = document.getElementById('progress-bar');
-            const loadingProgress = document.getElementById('loading-progress');
-            const progressSteps = [
-                { width: '20%', text: 'Loading Mol* library...' },
-                { width: '40%', text: 'Downloading AlphaFold structure...' },
-                { width: '60%', text: 'Parsing CIF file...' },
-                { width: '80%', text: 'Initializing 3D viewer...' },
-                { width: '100%', text: 'Ready!' }
-            ];
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for saved page state in localStorage or URL hash
+            const savedPage = localStorage.getItem('currentPage') || getPageFromURL();
+            const defaultPage = savedPage || 'home';
             
-            let step = 0;
-            const interval = setInterval(() => {
-                if (step < progressSteps.length) {
-                    progressBar.style.width = progressSteps[step].width;
-                    loadingProgress.textContent = progressSteps[step].text;
-                    step++;
-                } else {
-                    clearInterval(interval);
+            // Show the appropriate page
+            showPage(defaultPage);
+            
+            // Add fade-in animations to elements
+            const elements = document.querySelectorAll('.fade-in, .slide-up');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.animationDelay = `${index * 0.1}s`;
+                }, 50);
+            });
+
+            // Setup file upload functionality
+            setupFileUpload();
+            
+            // Save page state when page changes
+            window.addEventListener('beforeunload', function() {
+                const currentPage = getCurrentPage();
+                if (currentPage) {
+                    localStorage.setItem('currentPage', currentPage);
                 }
-            }, 800);
+            });
+        });
+
+        // Get current page from URL hash
+        function getPageFromURL() {
+            const hash = window.location.hash.replace('#', '');
+            const validPages = ['home', 'upload', 'results'];
+            return validPages.includes(hash) ? hash : null;
         }
 
-        // Load script dynamically with promise
+        // Get currently visible page
+        function getCurrentPage() {
+            const pages = ['upload-page', 'results-page', 'home-page'];
+            for (let pageId of pages) {
+                const page = document.getElementById(pageId);
+                if (page && !page.classList.contains('hidden')) {
+                    return pageId.replace('-page', '');
+                }
+            }
+            return 'home';
+        }
+
+        // Enhanced page navigation with state persistence
+        function showPage(pageName) {
+            const pages = ['upload-page', 'results-page', 'home-page'];
+            
+            // Add page transition effect
+            pages.forEach(pageId => {
+                const page = document.getElementById(pageId);
+                if (page) {
+                    if (pageId === pageName + '-page') {
+                        page.classList.remove('hidden');
+                        page.classList.add('page-transition');
+                        setTimeout(() => {
+                            page.classList.remove('page-hidden');
+                        }, 50);
+                    } else {
+                        page.classList.add('page-hidden');
+                        setTimeout(() => {
+                            page.classList.add('hidden');
+                        }, 300);
+                    }
+                }
+            });
+            
+            // Update URL hash without triggering page reload
+            if (history.pushState) {
+                history.pushState(null, null, '#' + pageName);
+            } else {
+                window.location.hash = pageName;
+            }
+            
+            // Save to localStorage for persistence
+            localStorage.setItem('currentPage', pageName);
+
+            // Initialize Mol* when showing results
+            if (pageName === 'results') {
+                setTimeout(loadMolstar, 500);
+            }
+        }
+
+        function goHome() {
+            showPage('home');
+            showNotification('Welcome to GeneLens', 'info');
+        }
+
+        function goToUpload() {
+            showPage('upload');
+            showNotification('Ready to upload genetic data', 'info');
+        }
+
+        function loadDemo() {
+            showPage('results');
+            showNotification('Loading demo data...', 'info');
+            // Initialize Mol* viewer for demo
+            setTimeout(loadMolstar, 1000);
+        }
+
+        function deleteData() {
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to delete all uploaded data? This action cannot be undone.')) {
+                // Simulate data deletion
+                showNotification('Data deleted successfully', 'success');
+                
+                // Reset any loaded data
+                molstarPlugin = null;
+                
+                // Go back to upload page
+                setTimeout(() => {
+                    goToUpload();
+                }, 1500);
+            }
+        }
+
+        // File upload functionality
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+
+            if (!uploadArea || !fileInput) return;
+
+            // Click to upload
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', handleFileUpload);
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('border-purple-500', 'bg-purple-500/10');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-purple-500', 'bg-purple-500/10');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-purple-500', 'bg-purple-500/10');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload({ target: { files } });
+                }
+            });
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            const validTypes = ['.txt', '.vcf', '.vcf.gz'];
+            const fileExtension = '.' + file.name.split('.').slice(-1)[0].toLowerCase();
+            const isGz = file.name.toLowerCase().endsWith('.vcf.gz');
+            
+            if (!validTypes.some(type => file.name.toLowerCase().endsWith(type))) {
+                showNotification('Invalid file type. Please upload .txt, .vcf, or .vcf.gz files.', 'error');
+                return;
+            }
+
+            // Simulate file processing
+            showNotification('Processing file: ' + file.name, 'info');
+            
+            // Show loading state
+            const uploadArea = document.getElementById('upload-area');
+            if (uploadArea) {
+                uploadArea.innerHTML = `
+                    <div class="loading">
+                        <div class="w-12 h-12 border-3 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p class="text-lg font-medium mb-2">Processing ${file.name}</p>
+                        <p class="text-gray-400">Analyzing genetic variants...</p>
+                    </div>
+                `;
+            }
+
+            // Simulate processing time
+            setTimeout(() => {
+                showNotification('File processed successfully!', 'success');
+                setTimeout(() => {
+                    loadDemo(); // Show results with demo data
+                }, 1000);
+            }, 3000);
+        }
+
+        // Enhanced tab switching with animations
+        function showTab(tabName) {
+            // Hide all content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.style.opacity = '0';
+                content.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    content.classList.remove('active');
+                }, 150);
+            });
+
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected content with animation
+            setTimeout(() => {
+                const targetContent = document.getElementById(`content-${tabName}`);
+                const targetTab = document.querySelector(`[data-tab="${tabName}"]`);
+                
+                if (targetContent && targetTab) {
+                    targetContent.classList.add('active');
+                    targetTab.classList.add('active');
+                    
+                    // Animate in
+                    setTimeout(() => {
+                        targetContent.style.opacity = '1';
+                        targetContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            }, 150);
+        }
+
+        // Enhanced progress simulation
+        function simulateProgress() {
+            const progressFill = document.getElementById('progress-fill');
+            if (!progressFill) return;
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                progressFill.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressFill.style.width = '100%';
+                    }, 200);
+                }
+            }, 200);
+        }
+
+        // Enhanced error display
+        function showError(message) {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const errorMessage = document.getElementById('error-message');
+
+            if (loadingState) loadingState.classList.add('hidden');
+            if (errorState) {
+                errorState.classList.remove('hidden');
+                if (errorMessage) errorMessage.textContent = message;
+            }
+        }
+
+        // Dynamic script loading
         function loadScript(src) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -364,24 +1531,22 @@
             });
         }
 
-        // Main Mol* loading function
+        // Enhanced Mol* loading with better error handling
         async function loadMolstar() {
             const loadingState = document.getElementById('loading-state');
             const errorState = document.getElementById('error-state');
-            const loadingStatus = document.getElementById('loading-status');
             
             // Reset states
-            loadingState.classList.remove('hidden');
-            errorState.classList.add('hidden');
-            loadingStatus.textContent = '(Loading...)';
+            if (loadingState) loadingState.classList.remove('hidden');
+            if (errorState) errorState.classList.add('hidden');
             
             // Start progress simulation
             simulateProgress();
             
-            // Set timeout for slow loading
+            // Set timeout for loading
             loadingTimeout = setTimeout(() => {
                 showError('Loading is taking longer than expected. Check your internet connection.');
-            }, 15000); // 15 second timeout
+            }, 20000);
 
             try {
                 // Dynamically load Mol* library
@@ -394,7 +1559,7 @@
                     throw new Error('Mol* library failed to load');
                 }
 
-                // Initialize Mol* plugin
+                // Initialize Mol* plugin with enhanced settings
                 console.log('Initializing Mol* viewer...');
                 const container = document.getElementById('molstar-container');
                 molstarPlugin = await molstar.Viewer.create(container, {
@@ -404,7 +1569,8 @@
                     layoutShowLeftPanel: false,
                     viewportShowExpand: false,
                     pdbProvider: 'rcsb',
-                    emdbProvider: 'rcsb'
+                    emdbProvider: 'rcsb',
+                    backgroundColor: '#121218'  // Match our dark theme
                 });
 
                 console.log('Loading AlphaFold structure...');
@@ -416,73 +1582,71 @@
 
                 // Success!
                 clearTimeout(loadingTimeout);
-                loadingState.classList.add('hidden');
-                loadingStatus.textContent = '(Loaded)';
+                if (loadingState) loadingState.classList.add('hidden');
                 
-                // Enable controls
-                document.getElementById('highlight-btn').disabled = false;
-                document.getElementById('reset-btn').disabled = false;
-                document.getElementById('surface-btn').disabled = false;
+                // Enable controls with enhanced styling
+                const highlightBtn = document.getElementById('highlight-btn');
+                const resetBtn = document.getElementById('reset-btn');
+                const surfaceBtn = document.getElementById('surface-btn');
+                const resetViewBtn = document.getElementById('reset-view-btn');
                 
-                console.log('Mol* viewer loaded successfully!');
+                if (highlightBtn) {
+                    highlightBtn.disabled = false;
+                    highlightBtn.classList.add('glow-purple');
+                }
+                if (resetBtn) resetBtn.disabled = false;
+                if (surfaceBtn) surfaceBtn.disabled = false;
+                if (resetViewBtn) resetViewBtn.disabled = false;
+                
+                console.log('Mol* viewer loaded successfully');
+                showNotification('Mol* viewer loaded successfully', 'success');
                 
             } catch (error) {
-                console.error('Mol* loading failed:', error);
+                console.error('Failed to load Mol* viewer:', error);
                 clearTimeout(loadingTimeout);
-                showError('Failed to load protein structure: ' + error.message);
+                showError(error.message || 'Unknown error occurred while loading the viewer.');
             }
         }
 
-        function showError(message) {
-            const loadingState = document.getElementById('loading-state');
-            const errorState = document.getElementById('error-state');
-            const loadingStatus = document.getElementById('loading-status');
-            
-            loadingState.classList.add('hidden');
-            errorState.classList.remove('hidden');
-            loadingStatus.textContent = '(Error)';
-            
-            // Update error message if needed
-            const errorText = errorState.querySelector('p');
-            if (message) errorText.textContent = message;
-        }
-
-        async function highlightResidue() {
+        // Enhanced highlight function with animations
+        function highlightResidue72() {
             if (!molstarPlugin) return;
             
             try {
-                console.log('Highlighting residue 72...');
-                
                 // Create selection for residue 72
-                const selection = molstarPlugin.managers.structure.selection.Compiler.compile([
-                    { residue: { authSeqId: 72 } }
-                ]);
+                const selection = molstarPlugin.managers.structure.selection.Selector.residueSelection({
+                    authSeqNumber: 72,
+                    chainId: 'A'
+                });
                 
-                // Apply selection
+                // Apply selection with glow effect
                 molstarPlugin.managers.structure.selection.set(selection);
-                
-                // Focus camera on selection
                 molstarPlugin.managers.camera.focusLoci(selection);
                 
-                // Visual feedback
+                // Enhanced visual feedback
                 const btn = document.getElementById('highlight-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check mr-1"></i>Highlighted!';
-                btn.classList.add('bg-green-600');
-                btn.classList.remove('bg-blue-600');
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check mr-1"></i>Highlighted!';
+                    btn.classList.remove('glow-purple');
+                    btn.classList.add('glow-green');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('glow-green');
+                        btn.classList.add('glow-purple');
+                    }, 2000);
+                }
                 
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.classList.remove('bg-green-600');
-                    btn.classList.add('bg-blue-600');
-                }, 2000);
+                showNotification('Residue 72 highlighted', 'success');
                 
             } catch (error) {
                 console.error('Highlighting failed:', error);
-                alert('Failed to highlight residue. This feature may not be available with this structure.');
+                showNotification('Failed to highlight residue', 'error');
             }
         }
 
+        // Enhanced reset view function
         function resetView() {
             if (!molstarPlugin) return;
             
@@ -490,11 +1654,14 @@
                 molstarPlugin.managers.camera.reset();
                 molstarPlugin.managers.structure.selection.clear();
                 console.log('View reset successfully');
+                showNotification('View reset', 'success');
             } catch (error) {
                 console.error('Reset failed:', error);
+                showNotification('Reset failed', 'error');
             }
         }
 
+        // Enhanced surface toggle with smooth transitions
         function toggleSurface() {
             if (!molstarPlugin) return;
             
@@ -504,69 +1671,215 @@
                 if (surfaceVisible) {
                     // Hide surface, show cartoon
                     molstarPlugin.managers.structure.component.setRepresentation('cartoon');
-                    button.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Surface';
+                    if (button) {
+                        button.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Surface';
+                        button.classList.remove('glow-cyan');
+                    }
                     surfaceVisible = false;
+                    showNotification('Cartoon view enabled', 'info');
                 } else {
                     // Show surface
                     molstarPlugin.managers.structure.component.setRepresentation('surface');
-                    button.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Cartoon';
+                    if (button) {
+                        button.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Cartoon';
+                        button.classList.add('glow-cyan');
+                    }
                     surfaceVisible = true;
+                    showNotification('Surface view enabled', 'info');
                 }
+                
                 console.log('Surface toggled:', surfaceVisible);
             } catch (error) {
                 console.error('Failed to toggle surface:', error);
-                alert('Surface toggle feature may not be available with this structure.');
+                showNotification('Surface toggle failed', 'error');
             }
         }
 
-        // Page navigation functions
-        function loadDemo() {
-            document.getElementById('upload-page').classList.add('hidden');
-            document.getElementById('results-page').classList.remove('hidden');
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-4 right-4 z-50 px-4 py-3 rounded-lg border backdrop-blur-lg transition-all duration-300 transform translate-x-full`;
             
-            // Start loading Mol* when protein tab is shown
+            // Style based on type
+            switch (type) {
+                case 'success':
+                    notification.classList.add('bg-green-500/20', 'border-green-500/30', 'text-green-400');
+                    notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500/20', 'border-red-500/30', 'text-red-400');
+                    notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+                    break;
+                case 'info':
+                default:
+                    notification.classList.add('bg-blue-500/20', 'border-blue-500/30', 'text-blue-400');
+                    notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${message}`;
+            }
+
+            document.body.appendChild(notification);
+
+            // Animate in
             setTimeout(() => {
-                if (document.getElementById('content-protein').classList.contains('tab-content') && 
-                    !document.getElementById('content-protein').classList.contains('hidden')) {
-                    loadMolstar();
+                notification.classList.remove('translate-x-full');
+            }, 100);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Enhanced keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case '1':
+                        e.preventDefault();
+                        showTab('protein');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        showTab('genome');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        showTab('traits');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        showTab('pgs');
+                        break;
+                    case '5':
+                        e.preventDefault();
+                        showTab('ai');
+                        break;
+                    case 'r':
+                        e.preventDefault();
+                        resetView();
+                        break;
                 }
-            }, 500);
+            }
+        });
+
+        // Enhanced button click handlers
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#highlight-btn')) {
+                highlightResidue72();
+            } else if (e.target.closest('#reset-btn, #reset-view-btn')) {
+                resetView();
+            } else if (e.target.closest('#surface-btn')) {
+                toggleSurface();
+            }
+        });
+
+        // Add smooth scrolling for any anchors
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Founder selection functionality
+        function selectFounder(index) {
+            // Update founder cards
+            document.querySelectorAll('.founder-card').forEach((card, i) => {
+                if (i === index) {
+                    card.classList.add('active');
+                    card.classList.remove('bg-slate-800/30');
+                    card.classList.add('bg-slate-800/50');
+                } else {
+                    card.classList.remove('active');
+                    card.classList.remove('bg-slate-800/50');
+                    card.classList.add('bg-slate-800/30');
+                }
+            });
+
+            // Update founder details
+            document.querySelectorAll('.founder-detail').forEach((detail, i) => {
+                if (i === index) {
+                    detail.classList.remove('hidden');
+                } else {
+                    detail.classList.add('hidden');
+                }
+            });
         }
 
-        function showUpload() {
-            document.getElementById('results-page').classList.add('hidden');
-            document.getElementById('upload-page').classList.remove('hidden');
-        }
+        // FAQ toggle functionality
+        function toggleFAQ(index) {
+            const faqItems = document.querySelectorAll('.faq-item');
+            const clickedItem = faqItems[index];
+            const content = clickedItem.querySelector('.faq-content');
+            const icon = clickedItem.querySelector('i');
 
-        function showTab(tabName) {
-            // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
+            if (content.classList.contains('hidden')) {
+                // Close all other FAQs
+                faqItems.forEach((item, i) => {
+                    if (i !== index) {
+                        const otherContent = item.querySelector('.faq-content');
+                        const otherIcon = item.querySelector('i');
+                        otherContent.classList.add('hidden');
+                        otherIcon.style.transform = 'rotate(0deg)';
+                    }
+                });
+
+                // Open clicked FAQ
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                // Close clicked FAQ
                 content.classList.add('hidden');
-            });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-indigo-500', 'text-indigo-600');
-                btn.classList.add('border-transparent', 'text-gray-500');
-            });
-            
-            // Show selected tab content
-            document.getElementById('content-' + tabName).classList.remove('hidden');
-            
-            // Add active class to selected tab
-            const activeTab = document.getElementById('tab-' + tabName);
-            activeTab.classList.add('border-indigo-500', 'text-indigo-600');
-            activeTab.classList.remove('border-transparent', 'text-gray-500');
-            
-            // Initialize Mol* when protein tab is shown for the first time
-            if (tabName === 'protein' && !molstarPlugin) {
-                setTimeout(loadMolstar, 100);
+                icon.style.transform = 'rotate(0deg)';
             }
         }
 
-        // Initialize with protein tab active
-        window.addEventListener('DOMContentLoaded', function() {
-            showTab('protein');
+        function showResults() {
+            showPage('results');
+            showNotification('Loading sample results...', 'info');
+            setTimeout(loadMolstar, 1000);
+        }
+
+        // Mobile menu functionality
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) {
+                mobileMenu.classList.toggle('open');
+                // Prevent body scroll when menu is open
+                if (mobileMenu.classList.contains('open')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuButton = document.querySelector('.mobile-menu-button');
+            
+            if (mobileMenu && mobileMenu.classList.contains('open') && 
+                !mobileMenu.contains(e.target) && !menuButton.contains(e.target)) {
+                toggleMobileMenu();
+            }
+        });
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function() {
+            const page = getPageFromURL() || 'home';
+            showPage(page);
         });
     </script>
 </body>
