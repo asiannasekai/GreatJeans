@@ -24,9 +24,45 @@ export default function ResultsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Load demo data on mount
-    loadDemoData();
+    const urlParams = new URLSearchParams(window.location.search);
+    const analysisId = urlParams.get('id');
+    
+    if (analysisId) {
+      // Load specific analysis results
+      loadAnalysisResults(analysisId);
+    } else {
+      // Load demo data
+      loadDemoData();
+    }
   }, []);
+
+  const loadAnalysisResults = async (analysisId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setUsingFallback(false);
+      
+      console.log(`Loading analysis results for ID: ${analysisId}`);
+      const response = await fetch(`/api/results?id=${analysisId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to load analysis results');
+      }
+      
+      const analysisResult = await response.json();
+      console.log("Successfully loaded analysis results:", analysisResult);
+      setResult(analysisResult);
+    } catch (err) {
+      console.error("Failed to load analysis results:", err);
+      console.log("Falling back to demo data...");
+      
+      // Fallback to demo data
+      setResult(DEMO_DATA as ResultJSON);
+      setUsingFallback(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadDemoData = async () => {
     try {
