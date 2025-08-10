@@ -156,36 +156,51 @@
                         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
                             <div class="p-6 border-b border-gray-200">
                                 <div class="flex justify-between items-center">
-                                    <h3 class="text-xl font-semibold">Secondary Structure</h3>
+                                    <h3 class="text-xl font-semibold flex items-center gap-2">
+                                        <i class="fas fa-project-diagram text-green-500"></i>
+                                        Secondary Structure
+                                        <span id="ss-loading-status" class="text-sm text-gray-500"></span>
+                                    </h3>
                                     <div class="flex gap-2">
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">High</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Real-time</span>
                                         <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">ESM-lite</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="p-6">
-                                <div class="space-y-4">
+                                <!-- Loading State for SS -->
+                                <div id="ss-loading" class="text-center py-8">
+                                    <div class="loading-spinner w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                                    <p class="text-gray-600 font-medium">Loading ESM-lite Predictions...</p>
+                                    <p class="text-sm text-gray-500 mt-1">Analyzing P04637 sequence</p>
+                                </div>
+
+                                <!-- ESM-lite Results -->
+                                <div id="ss-results" class="space-y-4" style="display: none;">
                                     <!-- Helix -->
                                     <div class="space-y-2">
                                         <div class="flex items-center justify-between text-sm">
-                                            <span class="font-medium">Helix</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ -0.020</span>
+                                            <span class="font-medium flex items-center">
+                                                <div class="w-3 h-3 bg-purple-500 rounded mr-2"></div>
+                                                Helix
+                                            </span>
+                                            <span id="helix-delta" class="text-xs px-2 py-1 bg-gray-100 rounded">Δ 0.000</span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <div>
                                                 <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>WT</span><span>45.0%</span>
+                                                    <span>WT</span><span id="helix-wt">0%</span>
                                                 </div>
                                                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-purple-500 opacity-60" style="width: 45%"></div>
+                                                    <div id="helix-wt-bar" class="h-full bg-purple-500 opacity-60 transition-all duration-500" style="width: 0%"></div>
                                                 </div>
                                             </div>
                                             <div>
                                                 <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Mut</span><span>43.0%</span>
+                                                    <span>Mut</span><span id="helix-mut">0%</span>
                                                 </div>
                                                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-purple-500" style="width: 43%"></div>
+                                                    <div id="helix-mut-bar" class="h-full bg-purple-500 transition-all duration-500" style="width: 0%"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -194,24 +209,27 @@
                                     <!-- Sheet -->
                                     <div class="space-y-2">
                                         <div class="flex items-center justify-between text-sm">
-                                            <span class="font-medium">Sheet</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ +0.020</span>
+                                            <span class="font-medium flex items-center">
+                                                <div class="w-3 h-3 bg-yellow-500 rounded mr-2"></div>
+                                                Sheet
+                                            </span>
+                                            <span id="sheet-delta" class="text-xs px-2 py-1 bg-gray-100 rounded">Δ 0.000</span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <div>
                                                 <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>WT</span><span>25.0%</span>
+                                                    <span>WT</span><span id="sheet-wt">0%</span>
                                                 </div>
                                                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-yellow-500 opacity-60" style="width: 25%"></div>
+                                                    <div id="sheet-wt-bar" class="h-full bg-yellow-500 opacity-60 transition-all duration-500" style="width: 0%"></div>
                                                 </div>
                                             </div>
                                             <div>
                                                 <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Mut</span><span>27.0%</span>
+                                                    <span>Mut</span><span id="sheet-mut">0%</span>
                                                 </div>
                                                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-yellow-500" style="width: 27%"></div>
+                                                    <div id="sheet-mut-bar" class="h-full bg-yellow-500 transition-all duration-500" style="width: 0%"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -220,52 +238,168 @@
                                     <!-- Coil -->
                                     <div class="space-y-2">
                                         <div class="flex items-center justify-between text-sm">
-                                            <span class="font-medium">Coil</span>
-                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ +0.000</span>
+                                            <span class="font-medium flex items-center">
+                                                <div class="w-3 h-3 bg-green-500 rounded mr-2"></div>
+                                                Coil
+                                            </span>
+                                            <span id="coil-delta" class="text-xs px-2 py-1 bg-gray-100 rounded">Δ 0.000</span>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <div>
                                                 <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>WT</span><span>30.0%</span>
+                                                    <span>WT</span><span id="coil-wt">0%</span>
                                                 </div>
                                                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-green-500 opacity-60" style="width: 30%"></div>
+                                                    <div id="coil-wt-bar" class="h-full bg-green-500 opacity-60 transition-all duration-500" style="width: 0%"></div>
                                                 </div>
                                             </div>
                                             <div>
                                                 <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                                    <span>Mut</span><span>30.0%</span>
+                                                    <span>Mut</span><span id="coil-mut">0%</span>
                                                 </div>
                                                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div class="h-full bg-green-500" style="width: 30%"></div>
+                                                    <div id="coil-mut-bar" class="h-full bg-green-500 transition-all duration-500" style="width: 0%"></div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Error State for SS -->
+                                <div id="ss-error" style="display: none;" class="text-center py-8">
+                                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                    </div>
+                                    <p class="text-red-600 font-medium">ESM-lite Connection Failed</p>
+                                    <p id="ss-error-message" class="text-sm text-gray-600 mt-1">Unable to load secondary structure predictions</p>
+                                    <button onclick="loadESMLite()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                        Retry ESM-lite
+                                    </button>
+                                </div>
                                 
-                                <div class="mt-4 text-xs text-gray-500 flex justify-between">
-                                    <span>ESM-lite prediction</span>
-                                    <span>Confidence: 82%</span>
+                                <div id="ss-footer" class="mt-4 text-xs text-gray-500 flex justify-between" style="display: none;">
+                                    <span>ESM-lite prediction • P04637 sequence</span>
+                                    <span>Confidence: <span id="ss-confidence">0%</span></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Other Tab Content (Structure, Genome, Traits) -->
+                <!-- Structure Tab Content -->
                 <div id="content-structure" class="tab-content hidden">
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
                         <div class="p-6 border-b border-gray-200">
-                            <h3 class="text-xl font-semibold">Protein Secondary Structure</h3>
+                            <h3 class="text-xl font-semibold flex items-center gap-2">
+                                <i class="fas fa-project-diagram text-purple-500"></i>
+                                Per-Residue Structure Analysis
+                                <span id="residue-loading-status" class="text-sm text-gray-500"></span>
+                                <!-- Debug buttons -->
+                                <button onclick="testElementAccess()" class="ml-4 px-2 py-1 bg-blue-500 text-white text-xs rounded">Test Elements</button>
+                                <button onclick="loadPerResidueAnalysis()" class="ml-2 px-2 py-1 bg-green-500 text-white text-xs rounded">Force Load</button>
+                            </h3>
                         </div>
                         <div class="p-6">
-                            <div class="h-80 bg-gray-100 rounded-xl flex items-center justify-center">
-                                <div class="text-center">
-                                    <i class="fas fa-project-diagram text-4xl text-gray-400 mb-4"></i>
-                                    <p class="text-gray-600 mb-2">Structure Analysis</p>
-                                    <p class="text-sm text-gray-500">ESM-lite predictions and annotations</p>
+                            <!-- Loading State -->
+                            <div id="residue-loading" class="text-center py-8">
+                                <div class="loading-spinner w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                                <p class="text-gray-600 font-medium">Loading Per-Residue Predictions...</p>
+                                <p class="text-sm text-gray-500 mt-1">ESM-lite analyzing sequence positions</p>
+                            </div>
+
+                            <!-- Per-Residue Visualization -->
+                            <div id="residue-results" style="display: none;">
+                                <!-- Sequence Overview -->
+                                <div class="mb-6">
+                                    <h4 class="font-medium text-gray-900 mb-3">P04637 Sequence Overview</h4>
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <div class="flex items-center gap-4 text-sm">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-purple-500 rounded"></div>
+                                                <span>Helix</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-yellow-500 rounded"></div>
+                                                <span>Sheet</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-green-500 rounded"></div>
+                                                <span>Coil</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Residue Visualization Strip -->
+                                        <div class="mt-4">
+                                            <div class="text-xs text-gray-600 mb-2">Residue 1-100 (showing first 100 positions)</div>
+                                            <div id="residue-strip" class="h-8 bg-white rounded border flex overflow-hidden">
+                                                <!-- Will be populated by JavaScript -->
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Residue 72 Highlight -->
+                                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                            <h5 class="font-medium text-blue-900 mb-1">Residue 72 (Pro→Arg Mutation)</h5>
+                                            <div class="text-sm text-blue-800">
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <span class="font-medium">Wild Type:</span>
+                                                        <div id="wt-72" class="mt-1">Loading...</div>
+                                                    </div>
+                                                    <div>
+                                                        <span class="font-medium">Mutant:</span>
+                                                        <div id="mut-72" class="mt-1">Loading...</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <!-- Detailed Analysis -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-3">Structure Confidence</h4>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm">Overall Confidence</span>
+                                                <span id="overall-confidence" class="font-medium">0%</span>
+                                            </div>
+                                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div id="confidence-bar" class="h-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-3">Prediction Summary</h4>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Sequence Length:</span>
+                                                <span id="seq-length">0 residues</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Analyzed Window:</span>
+                                                <span id="window-info">Center: 0, Length: 0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Model:</span>
+                                                <span>ESM-lite</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Error State -->
+                            <div id="residue-error" style="display: none;" class="text-center py-8">
+                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                </div>
+                                <p class="text-red-600 font-medium">Failed to Load Structure Analysis</p>
+                                <p id="residue-error-message" class="text-sm text-gray-600 mt-1">Analysis error occurred</p>
+                                <button onclick="loadPerResidueAnalysis()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    Retry Analysis
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -328,6 +462,68 @@
         let molstarPlugin = null;
         let loadingTimeout = null;
         let surfaceVisible = false;
+        
+        // ESM-lite Backend Integration
+        let esliteData = null;
+
+        // DOM validation utility
+        function validateRequiredElements() {
+            const requiredElements = [
+                'residue-loading', 'residue-results', 'residue-error', 'residue-error-message',
+                'ss-loading', 'ss-results', 'ss-error', 'ss-error-message',
+                'seq-length', 'window-info', 'overall-confidence'
+            ];
+            
+            const missing = [];
+            const found = [];
+            
+            requiredElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    found.push(id);
+                } else {
+                    missing.push(id);
+                }
+            });
+            
+            console.log('DOM Validation Results:');
+            console.log('✅ Found elements:', found.length, found);
+            if (missing.length > 0) {
+                console.warn('⚠️ Missing elements:', missing.length, missing);
+            }
+            
+            return missing.length === 0;
+        }
+
+        // Wait for DOM to be fully ready
+        function waitForDOM() {
+            return new Promise((resolve) => {
+                if (document.readyState === 'complete') {
+                    resolve();
+                } else {
+                    window.addEventListener('load', resolve);
+                }
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM Content Loaded - Initializing application...');
+            
+            // Validate required DOM elements
+            setTimeout(() => {
+                const allElementsPresent = validateRequiredElements();
+                if (allElementsPresent) {
+                    console.log('✅ All required DOM elements found');
+                } else {
+                    console.warn('⚠️ Some required DOM elements are missing - functionality may be limited');
+                }
+            }, 100);
+            console.log('Page loaded, checking DOM elements...');
+            setTimeout(() => {
+                checkRequiredElements();
+            }, 100);
+        });
 
         // Progress simulation for better UX
         function simulateProgress() {
@@ -524,13 +720,551 @@
             document.getElementById('upload-page').classList.add('hidden');
             document.getElementById('results-page').classList.remove('hidden');
             
-            // Start loading Mol* when protein tab is shown
+            // Start loading Mol* and ESM-lite when protein tab is shown
             setTimeout(() => {
                 if (document.getElementById('content-protein').classList.contains('tab-content') && 
                     !document.getElementById('content-protein').classList.contains('hidden')) {
                     loadMolstar();
+                    loadESMLite();
                 }
             }, 500);
+        }
+
+        // ESM-lite Backend Integration
+        
+        async function loadESMLite() {
+            const loadingEl = document.getElementById('ss-loading');
+            const resultsEl = document.getElementById('ss-results');
+            const errorEl = document.getElementById('ss-error');
+            const statusEl = document.getElementById('ss-loading-status');
+            const footerEl = document.getElementById('ss-footer');
+            
+            // Check if elements exist
+            if (!loadingEl || !resultsEl || !errorEl) {
+                console.error('Critical ESM-lite UI elements missing');
+                return;
+            }
+            
+            // Reset states
+            loadingEl.style.display = 'block';
+            resultsEl.style.display = 'none';
+            errorEl.style.display = 'none';
+            if (footerEl) footerEl.style.display = 'none';
+            if (statusEl) statusEl.textContent = '(Loading...)';
+            
+            try {
+                // First check backend health
+                console.log('Checking backend health...');
+                const healthCheck = await fetch('http://localhost:8000/health', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (!healthCheck.ok) {
+                    throw new Error('Backend server not responding');
+                }
+                
+                // Real P04637 (TP53) sequence - first 100 residues
+                const tp53_sequence = "MEEPQSDPSVEPPLSQETFSDLWKLLPENNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMPEAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPS";
+                // Pro72Arg mutation - replace P at position 72 with R
+                const tp53_mutant = tp53_sequence.substring(0, 71) + 'R' + tp53_sequence.substring(72);
+                
+                console.log('Fetching ESM-lite predictions...');
+                if (statusEl) statusEl.textContent = '(Connecting to ESM-lite...)';
+                
+                const response = await fetch('http://localhost:8000/model/ss_predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        wt_seq: tp53_sequence,
+                        mut_seq: tp53_mutant
+                    }),
+                    signal: AbortSignal.timeout(15000)  // 15 second timeout
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                if (statusEl) statusEl.textContent = '(Processing predictions...)';
+                esliteData = await response.json();
+                console.log('ESM-lite data received:', esliteData);
+                
+                // Validate data structure
+                if (!esliteData || !esliteData.wt || !esliteData.mut) {
+                    throw new Error('Invalid response format from ESM-lite API');
+                }
+                
+                // Update UI with real data
+                updateSecondaryStructureDisplay(esliteData);
+                
+                // Show results
+                loadingEl.style.display = 'none';
+                resultsEl.style.display = 'block';
+                if (footerEl) footerEl.style.display = 'flex';
+                if (statusEl) statusEl.textContent = '(Loaded)';
+                
+                console.log('✅ ESM-lite predictions loaded successfully');
+                
+            } catch (error) {
+                console.error('ESM-lite loading failed:', error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                if (statusEl) statusEl.textContent = '(Error)';
+                
+                // Show specific error message
+                const errorMsgEl = document.getElementById('ss-error-message');
+                if (errorMsgEl) {
+                    if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
+                        errorMsgEl.textContent = 'Request timed out. ESM-lite model may be loading for the first time (can take 30+ seconds).';
+                    } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                        errorMsgEl.textContent = 'Backend connection failed. Make sure the FastAPI server is running on port 8000.';
+                    } else if (error.message.includes('500')) {
+                        errorMsgEl.textContent = 'ESM-lite model error. The model may need to be initialized.';
+                    } else {
+                        errorMsgEl.textContent = `Error: ${error.message}`;
+                    }
+                }
+            }
+        }
+        
+        function updateSecondaryStructureDisplay(data) {
+            console.log('🎨 Updating secondary structure display...');
+            
+            try {
+                // Helper function to format percentages
+                const formatPercent = (value) => {
+                    const num = parseFloat(value);
+                    return isNaN(num) ? '0.0%' : (num * 100).toFixed(1) + '%';
+                };
+                
+                const formatDelta = (value) => {
+                    const num = parseFloat(value);
+                    if (isNaN(num)) return 'Δ 0.000';
+                    return (num >= 0 ? 'Δ +' : 'Δ ') + (num * 100).toFixed(3);
+                };
+                
+                // Update element with null check
+                const updateElement = (id, value) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (id.includes('bar')) {
+                            el.style.width = value;
+                        } else {
+                            el.textContent = value;
+                        }
+                        return true;
+                    } else {
+                        console.warn(`Element ${id} not found`);
+                        return false;
+                    }
+                };
+                
+                // Helix updates
+                if (data.wt && data.mut && data.delta) {
+                    updateElement('helix-wt', formatPercent(data.wt.helix));
+                    updateElement('helix-mut', formatPercent(data.mut.helix));
+                    updateElement('helix-delta', formatDelta(data.delta.helix));
+                    updateElement('helix-wt-bar', formatPercent(data.wt.helix));
+                    updateElement('helix-mut-bar', formatPercent(data.mut.helix));
+                    
+                    // Sheet updates
+                    updateElement('sheet-wt', formatPercent(data.wt.sheet));
+                    updateElement('sheet-mut', formatPercent(data.mut.sheet));
+                    updateElement('sheet-delta', formatDelta(data.delta.sheet));
+                    updateElement('sheet-wt-bar', formatPercent(data.wt.sheet));
+                    updateElement('sheet-mut-bar', formatPercent(data.mut.sheet));
+                    
+                    // Coil updates
+                    updateElement('coil-wt', formatPercent(data.wt.coil));
+                    updateElement('coil-mut', formatPercent(data.mut.coil));
+                    updateElement('coil-delta', formatDelta(data.delta.coil));
+                    updateElement('coil-wt-bar', formatPercent(data.wt.coil));
+                    updateElement('coil-mut-bar', formatPercent(data.mut.coil));
+                    
+                    // Update confidence
+                    const avgConfidence = (data.wt.confidence + data.mut.confidence) / 2;
+                    updateElement('ss-confidence', (avgConfidence * 100).toFixed(0) + '%');
+                    
+                    console.log('✅ Secondary structure display updated successfully');
+                } else {
+                    throw new Error('Invalid data structure received');
+                }
+                
+            } catch (error) {
+                console.error('Error updating secondary structure display:', error);
+                // Show error in the UI
+                const errorEl = document.getElementById('ss-error');
+                const resultsEl = document.getElementById('ss-results');
+                if (errorEl && resultsEl) {
+                    resultsEl.style.display = 'none';
+                    errorEl.style.display = 'block';
+                    const errorMsgEl = document.getElementById('ss-error-message');
+                    if (errorMsgEl) {
+                        errorMsgEl.textContent = `Display Error: ${error.message}`;
+                    }
+                }
+            }
+        }
+        
+        // Per-residue analysis for Structure tab - SIMPLIFIED VERSION
+        async function loadPerResidueAnalysis() {
+            console.log('🔄 Starting per-residue analysis...');
+            
+            // Step 1: Find the basic elements with enhanced error reporting
+            const loadingEl = document.getElementById('residue-loading');
+            const resultsEl = document.getElementById('residue-results');
+            const errorEl = document.getElementById('residue-error');
+            const statusEl = document.getElementById('residue-loading-status');
+            
+            console.log('Step 1 - Element check:', {
+                loading: !!loadingEl,
+                results: !!resultsEl, 
+                error: !!errorEl,
+                status: !!statusEl
+            });
+            
+            if (!loadingEl) {
+                console.error('❌ Critical: residue-loading element missing');
+                showStructureAnalysisError('Loading element not found in DOM');
+                return;
+            }
+            
+            if (!resultsEl) {
+                console.error('❌ Critical: residue-results element missing');
+                showStructureAnalysisError('Results element not found in DOM');
+                return;
+            }
+            
+            if (!errorEl) {
+                console.error('❌ Critical: residue-error element missing');
+                showStructureAnalysisError('Error element not found in DOM');
+                return;
+            }
+            
+            // Step 2: Reset UI state with error handling
+            try {
+                loadingEl.style.display = 'block';
+                resultsEl.style.display = 'none';
+                errorEl.style.display = 'none';
+                if (statusEl) statusEl.textContent = '(Loading...)';
+                console.log('✅ Step 2 - UI reset successful');
+            } catch (error) {
+                console.error('❌ Step 2 failed:', error);
+                showStructureAnalysisError(`UI reset failed: ${error.message}`);
+                return;
+            }
+            
+            // Step 3: Check if we need to fetch data with enhanced error handling
+            try {
+                if (!esliteData) {
+                    console.log('📡 Step 3 - Fetching ESM-lite data...');
+                    if (statusEl) statusEl.textContent = '(Fetching data...)';
+                    
+                    // Try to load data with timeout
+                    const fetchPromise = loadESMLite();
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Data fetch timeout after 30 seconds')), 30000)
+                    );
+                    
+                    await Promise.race([fetchPromise, timeoutPromise]);
+                }
+                
+                if (!esliteData) {
+                    throw new Error('ESM-lite data unavailable after fetch attempt');
+                }
+                
+                console.log('✅ Step 3 - Data available:', esliteData);
+            } catch (error) {
+                console.error('❌ Step 3 failed:', error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                if (statusEl) statusEl.textContent = '(Error)';
+                
+                const errorMsgEl = document.getElementById('residue-error-message');
+                if (errorMsgEl) {
+                    errorMsgEl.textContent = `Data fetch failed: ${error.message}`;
+                }
+                return;
+            }
+            
+            // Step 4: Update display with SAFE access and enhanced error handling
+            try {
+                console.log('🎨 Step 4 - Updating display...');
+                if (statusEl) statusEl.textContent = '(Updating display...)';
+                
+                // Safe update of basic elements with comprehensive validation
+                const seqLengthEl = document.getElementById('seq-length');
+                if (seqLengthEl && esliteData.window) {
+                    seqLengthEl.textContent = `${esliteData.window.length || 0} residues`;
+                    console.log('✅ Updated seq-length');
+                } else {
+                    console.warn('⚠️ seq-length element or window data missing');
+                }
+                
+                const windowInfoEl = document.getElementById('window-info');
+                if (windowInfoEl && esliteData.window) {
+                    windowInfoEl.textContent = `Center: ${esliteData.window.center || 0}, Length: ${esliteData.window.length || 0}`;
+                    console.log('✅ Updated window-info');
+                } else {
+                    console.warn('⚠️ window-info element or window data missing');
+                }
+                
+                const overallConfidenceEl = document.getElementById('overall-confidence');
+                if (overallConfidenceEl && esliteData.wt && esliteData.mut) {
+                    const avgConfidence = (esliteData.wt.confidence + esliteData.mut.confidence) / 2;
+                    overallConfidenceEl.textContent = (avgConfidence * 100).toFixed(1) + '%';
+                    console.log('✅ Updated overall-confidence');
+                } else {
+                    console.warn('⚠️ overall-confidence element or confidence data missing');
+                }
+                
+                // Try to generate residue strip if function exists
+                if (typeof generateResidueStrip === 'function') {
+                    try {
+                        generateResidueStrip(esliteData);
+                        console.log('✅ Residue strip generated');
+                    } catch (stripError) {
+                        console.warn('⚠️ Residue strip generation failed:', stripError);
+                    }
+                } else {
+                    console.warn('⚠️ generateResidueStrip function not available');
+                }
+                
+                // Try to update residue 72 info if function exists
+                if (typeof updateResidue72Info === 'function') {
+                    try {
+                        updateResidue72Info(esliteData);
+                        console.log('✅ Residue 72 info updated');
+                    } catch (residueError) {
+                        console.warn('⚠️ Residue 72 update failed:', residueError);
+                    }
+                } else {
+                    console.warn('⚠️ updateResidue72Info function not available');
+                }
+                
+                // Show results
+                loadingEl.style.display = 'none';
+                resultsEl.style.display = 'block';
+                if (statusEl) statusEl.textContent = '(Loaded)';
+                console.log('✅ Step 4 complete - Analysis loaded successfully');
+                
+            } catch (error) {
+                console.error('❌ Step 4 failed:', error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                if (statusEl) statusEl.textContent = '(Error)';
+                
+                // Show specific error
+                const errorMsg = errorEl.querySelector('p');
+                if (errorMsg) {
+                    errorMsg.textContent = `Display Error: ${error.message}`;
+                } else {
+                    console.error('❌ Error message element not found');
+                }
+            }
+        }
+        
+        // Backend health check
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('http://localhost:8000/health', {
+                    method: 'GET',
+                    timeout: 5000
+                });
+                return response.ok;
+            } catch (error) {
+                console.log('Backend health check failed:', error);
+                return false;
+            }
+        }
+        
+        // Debug function to check DOM elements
+        function checkRequiredElements() {
+            const requiredElements = [
+                'seq-length', 'window-info', 'overall-confidence', 'confidence-bar',
+                'residue-strip', 'wt-72', 'mut-72',
+                'helix-wt', 'helix-mut', 'helix-delta', 'helix-wt-bar', 'helix-mut-bar',
+                'sheet-wt', 'sheet-mut', 'sheet-delta', 'sheet-wt-bar', 'sheet-mut-bar',
+                'coil-wt', 'coil-mut', 'coil-delta', 'coil-wt-bar', 'coil-mut-bar',
+                'ss-confidence'
+            ];
+            
+            const missingElements = [];
+            const foundElements = [];
+            
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (!element) {
+                    missingElements.push(id);
+                } else {
+                    foundElements.push(id);
+                }
+            });
+            
+            console.log('DOM Element Check Results:');
+            console.log('✅ Found elements:', foundElements.length, foundElements);
+            if (missingElements.length > 0) {
+                console.error('❌ Missing elements:', missingElements.length, missingElements);
+                return false;
+            } else {
+                console.log('✅ All required DOM elements found');
+                return true;
+            }
+        }
+        
+        // Simple element-by-element test
+        function testElementAccess() {
+            console.log('Testing element access:');
+            
+            // Test each element individually
+            const testElements = ['seq-length', 'window-info', 'overall-confidence'];
+            testElements.forEach(id => {
+                try {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = 'TEST';
+                        console.log(`✅ ${id}: OK`);
+                    } else {
+                        console.error(`❌ ${id}: NULL`);
+                    }
+                } catch (error) {
+                    console.error(`❌ ${id}: ERROR -`, error.message);
+                }
+            });
+        }
+        
+        function updatePerResidueDisplay(data) {
+            console.log('Updating per-residue display with:', data);
+            
+            try {
+                // Update sequence info with null checks
+                const seqLengthEl = document.getElementById('seq-length');
+                const windowInfoEl = document.getElementById('window-info');
+                const overallConfidenceEl = document.getElementById('overall-confidence');
+                const confidenceBarEl = document.getElementById('confidence-bar');
+                
+                if (seqLengthEl) {
+                    seqLengthEl.textContent = `${data.window.length} residues`;
+                } else {
+                    console.warn('seq-length element not found');
+                }
+                
+                if (windowInfoEl) {
+                    windowInfoEl.textContent = `Center: ${data.window.center}, Length: ${data.window.length}`;
+                } else {
+                    console.warn('window-info element not found');
+                }
+                
+                // Update confidence
+                const avgConfidence = (data.wt.confidence + data.mut.confidence) / 2;
+                if (overallConfidenceEl) {
+                    overallConfidenceEl.textContent = (avgConfidence * 100).toFixed(1) + '%';
+                } else {
+                    console.warn('overall-confidence element not found');
+                }
+                
+                if (confidenceBarEl) {
+                    confidenceBarEl.style.width = (avgConfidence * 100) + '%';
+                } else {
+                    console.warn('confidence-bar element not found');
+                }
+                
+                // Generate residue strip visualization
+                generateResidueStrip(data);
+                
+                // Update residue 72 specific info
+                updateResidue72Info(data);
+                
+                console.log('Per-residue display updated successfully');
+            } catch (error) {
+                console.error('Error updating per-residue display:', error);
+                throw new Error(`Display update failed: ${error.message}`);
+            }
+        }
+        
+        function generateResidueStrip(data) {
+            console.log('Generating residue strip...');
+            
+            try {
+                const stripEl = document.getElementById('residue-strip');
+                if (!stripEl) {
+                    throw new Error('Residue strip element not found');
+                }
+                
+                stripEl.innerHTML = '';
+                
+                // Create 100 residue blocks (simplified for demo)
+                const numResidues = Math.min(100, data.window.length || 100);
+                console.log(`Creating ${numResidues} residue blocks`);
+                
+                for (let i = 0; i < numResidues; i++) {
+                    const residueEl = document.createElement('div');
+                    residueEl.className = 'flex-1 h-full border-r border-gray-200';
+                    
+                    // Color based on predicted secondary structure (simplified)
+                    const helixProb = data.wt.helix || 0.33;
+                    const sheetProb = data.wt.sheet || 0.33;
+                    const coilProb = data.wt.coil || 0.33;
+                    
+                    if (helixProb > sheetProb && helixProb > coilProb) {
+                        residueEl.style.backgroundColor = '#a855f7'; // purple for helix
+                    } else if (sheetProb > coilProb) {
+                        residueEl.style.backgroundColor = '#eab308'; // yellow for sheet
+                    } else {
+                        residueEl.style.backgroundColor = '#22c55e'; // green for coil
+                    }
+                    
+                    // Highlight residue 72 if in range
+                    if (i === 71) { // 0-indexed
+                        residueEl.style.border = '2px solid #3b82f6';
+                        residueEl.style.backgroundColor = '#dbeafe';
+                        residueEl.title = 'Residue 72 - Pro→Arg mutation';
+                    }
+                    
+                    stripEl.appendChild(residueEl);
+                }
+                
+                console.log('Residue strip generated successfully');
+            } catch (error) {
+                console.error('Error generating residue strip:', error);
+                throw error;
+            }
+        }
+        
+        function updateResidue72Info(data) {
+            const formatSS = (helix, sheet, coil) => 
+                `H: ${(helix*100).toFixed(1)}%, E: ${(sheet*100).toFixed(1)}%, C: ${(coil*100).toFixed(1)}%`;
+            
+            const wt72El = document.getElementById('wt-72');
+            const mut72El = document.getElementById('mut-72');
+            
+            if (wt72El) {
+                wt72El.innerHTML = `
+                    <div class="text-xs">
+                        <div>Proline (P)</div>
+                        <div class="text-gray-600">${formatSS(data.wt.helix, data.wt.sheet, data.wt.coil)}</div>
+                    </div>
+                `;
+            } else {
+                console.warn('wt-72 element not found');
+            }
+            
+            if (mut72El) {
+                mut72El.innerHTML = `
+                    <div class="text-xs">
+                        <div>Arginine (R)</div>
+                        <div class="text-gray-600">${formatSS(data.mut.helix, data.mut.sheet, data.mut.coil)}</div>
+                    </div>
+                `;
+            } else {
+                console.warn('mut-72 element not found');
+            }
         }
 
         function showUpload() {
@@ -539,6 +1273,8 @@
         }
 
         function showTab(tabName) {
+            console.log(`🔄 Switching to tab: ${tabName}`);
+            
             // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
@@ -551,21 +1287,133 @@
             });
             
             // Show selected tab content
-            document.getElementById('content-' + tabName).classList.remove('hidden');
+            const contentEl = document.getElementById('content-' + tabName);
+            if (contentEl) {
+                contentEl.classList.remove('hidden');
+                console.log(`✅ Tab content shown: ${tabName}`);
+            } else {
+                console.error(`❌ Tab content not found: content-${tabName}`);
+                return;
+            }
             
             // Add active class to selected tab
             const activeTab = document.getElementById('tab-' + tabName);
-            activeTab.classList.add('border-indigo-500', 'text-indigo-600');
-            activeTab.classList.remove('border-transparent', 'text-gray-500');
+            if (activeTab) {
+                activeTab.classList.add('border-indigo-500', 'text-indigo-600');
+                activeTab.classList.remove('border-transparent', 'text-gray-500');
+                console.log(`✅ Tab activated: ${tabName}`);
+            } else {
+                console.error(`❌ Tab button not found: tab-${tabName}`);
+            }
             
             // Initialize Mol* when protein tab is shown for the first time
             if (tabName === 'protein' && !molstarPlugin) {
+                console.log('🧬 Loading Mol* for protein tab...');
                 setTimeout(loadMolstar, 100);
+            }
+            
+            // Load ESM-lite data for secondary structure tab
+            if (tabName === 'secondary') {
+                console.log('🔬 Loading ESM-lite for secondary structure tab...');
+                if (esliteData === null) {
+                    setTimeout(() => {
+                        console.log('🔄 Starting ESM-lite load with retry...');
+                        loadESMLiteWithRetry();
+                    }, 200);
+                } else {
+                    console.log('✅ ESM-lite data already loaded');
+                    updateSecondaryStructureDisplay(esliteData);
+                }
+            }
+            
+            // Load per-residue analysis for structure tab
+            if (tabName === 'structure') {
+                console.log('📊 Loading structure analysis...');
+                if (esliteData === null) {
+                    setTimeout(() => {
+                        console.log('🔄 Starting structure analysis with retry...');
+                        loadStructureAnalysisWithRetry();
+                    }, 200);
+                } else {
+                    console.log('✅ Structure data already loaded');
+                    loadPerResidueAnalysis();
+                }
             }
         }
 
-        // Initialize with protein tab active
-        window.addEventListener('DOMContentLoaded', function() {
+        // ESM-lite loader with retry mechanism
+        async function loadESMLiteWithRetry(maxRetries = 3) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`🔄 ESM-lite attempt ${attempt}/${maxRetries}`);
+                    await loadESMLite();
+                    if (esliteData) {
+                        console.log('✅ ESM-lite loaded successfully');
+                        return;
+                    }
+                } catch (error) {
+                    console.error(`❌ ESM-lite attempt ${attempt} failed:`, error);
+                    if (attempt === maxRetries) {
+                        console.error('❌ All ESM-lite attempts failed');
+                        showESMLiteError(`Failed after ${maxRetries} attempts: ${error.message}`);
+                    } else {
+                        // Wait before retry
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    }
+                }
+            }
+        }
+
+        // Structure analysis loader with retry mechanism  
+        async function loadStructureAnalysisWithRetry(maxRetries = 3) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`🔄 Structure analysis attempt ${attempt}/${maxRetries}`);
+                    await loadPerResidueAnalysis();
+                    console.log('✅ Structure analysis loaded successfully');
+                    return;
+                } catch (error) {
+                    console.error(`❌ Structure analysis attempt ${attempt} failed:`, error);
+                    if (attempt === maxRetries) {
+                        console.error('❌ All structure analysis attempts failed');
+                        showStructureAnalysisError(`Failed after ${maxRetries} attempts: ${error.message}`);
+                    } else {
+                        // Wait before retry
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    }
+                }
+            }
+        }
+
+        // Show ESM-lite specific error
+        function showESMLiteError(message) {
+            const errorEl = document.getElementById('ss-error');
+            const errorMsgEl = document.getElementById('ss-error-message');
+            const loadingEl = document.getElementById('ss-loading');
+            const resultsEl = document.getElementById('ss-results');
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (resultsEl) resultsEl.style.display = 'none';
+            if (errorEl) errorEl.style.display = 'block';
+            if (errorMsgEl) errorMsgEl.textContent = message;
+        }
+
+        // Show structure analysis specific error
+        function showStructureAnalysisError(message) {
+            const errorEl = document.getElementById('residue-error');
+            const errorMsgEl = document.getElementById('residue-error-message');
+            const loadingEl = document.getElementById('residue-loading');
+            const resultsEl = document.getElementById('residue-results');
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (resultsEl) resultsEl.style.display = 'none';
+            if (errorEl) errorEl.style.display = 'block';
+            if (errorMsgEl) errorMsgEl.textContent = message;
+        }
+
+        // Initialize with protein tab active (after full DOM load)
+        window.addEventListener('load', function() {
+            console.log('🎯 Window loaded - Activating protein tab...');
             showTab('protein');
         });
     </script>

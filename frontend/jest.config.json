@@ -1,0 +1,26 @@
+{
+  "testEnvironment": "jsdom",
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+  "transform": {
+    "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+  },
+  "moduleDirectories": ["node_modules", "<rootDir>/src"],
+  "testMatch": [
+    "**/__tests__/**/*.(js|jsx|ts|tsx)",
+    "**/*.(test|spec).(js|jsx|ts|tsx)"
+  ],
+  "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
+  "collectCoverageFrom": [
+    "src/**/*.(js|jsx|ts|tsx)",
+    "!src/**/*.d.ts"
+  ],
+  "extensionsToTreatAsEsm": [".ts", ".tsx"],
+  "globals": {
+    "ts-jest": {
+      "useESM": true
+    }
+  }
+}

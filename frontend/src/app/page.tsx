@@ -1,0 +1,31 @@
+import React from 'react';
+import Link from 'next/link';
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-slate-900 mb-4">
+          GeneLens
+        </h1>
+        <p className="text-lg text-slate-600 mb-8">
+          DNA Analysis Made Simple
+        </p>
+        <div className="space-x-4">
+          <Link
+            href="/upload"
+            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            Upload File
+          </Link>
+          <Link
+            href="/results"
+            className="inline-flex items-center px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            View Demo
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

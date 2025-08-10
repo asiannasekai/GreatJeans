@@ -21,6 +21,10 @@ app = FastAPI(title="Mini AlphaFold LLM Explainer")
 def health():
     return {"ok": True}
 
+@app.get("/health")
+def health_check():
+    return {"ok": True}
+
 @app.post("/explain")
 def explain(pred: Prediction):
     if len(pred.sequence) != len(pred.labels) or len(pred.sequence) != len(pred.probs):
