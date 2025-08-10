@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreatJeans - Genomics Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .molstar-container { width: 100%; height: 400px; }
+        .loading-spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .tab-btn.active { background-color: white; color: #1f2937; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .tab-content { display: none; }
+        .tab-content:not(.hidden) { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Upload Page -->
+        <div id="upload-page" class="min-h-screen flex items-center justify-center">
+            <div class="max-w-md w-full mx-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-dna text-2xl text-indigo-600"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">GreatJeans</h1>
+                    <p class="text-gray-600 mb-8">Upload your genomic data for comprehensive analysis</p>
+                    
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 mb-6 hover:border-indigo-400 transition-colors">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-4"></i>
+                        <p class="text-sm text-gray-600 mb-2">Drop your VCF or 23andMe file here</p>
+                        <p class="text-xs text-gray-500">Supports .vcf, .txt formats</p>
+                    </div>
+                    
+                    <button onclick="loadDemo()" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-indigo-700 transition-colors mb-4">
+                        Load Demo Data
+                    </button>
+                    
+                    <button class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                        Choose File
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div id="results-page" class="hidden">
+            <!-- Header -->
+            <header class="bg-white border-b border-gray-200 px-6 py-4">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-2xl font-bold text-gray-900">GreatJeans</h1>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Demo Results</span>
+                    </div>
+                    <button onclick="showUpload()" class="text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Upload
+                    </button>
+                </div>
+            </header>
+
+            <!-- Navigation Tabs -->
+            <div class="bg-white border-b border-gray-200 px-6">
+                <div class="max-w-7xl mx-auto">
+                    <nav class="flex space-x-8">
+                        <button id="tab-protein" onclick="showTab('protein')" class="tab-btn py-4 px-1 border-b-2 font-medium text-sm border-indigo-500 text-indigo-600">
+                            <i class="fas fa-atom mr-2"></i>Protein
+                        </button>
+                        <button id="tab-structure" onclick="showTab('structure')" class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-project-diagram mr-2"></i>Structure
+                        </button>
+                        <button id="tab-genome" onclick="showTab('genome')" class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-dna mr-2"></i>Genome
+                        </button>
+                        <button id="tab-traits" onclick="showTab('traits')" class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-chart-bar mr-2"></i>Traits
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-6 py-6">
+                <!-- Protein Tab Content -->
+                <div id="content-protein" class="tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Mol* Protein Structure Viewer -->
+                        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h3 class="text-xl font-semibold flex items-center gap-2">
+                                    <i class="fas fa-cube text-blue-500"></i>
+                                    Protein Structure
+                                    <span id="loading-status" class="text-sm text-gray-500"></span>
+                                </h3>
+                            </div>
+                            <div class="p-6">
+                                <!-- Mol* Viewer Container -->
+                                <div id="molstar-container" class="h-96 bg-gray-100 rounded-xl relative overflow-hidden">
+                                    <!-- Loading State -->
+                                    <div id="loading-state" class="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                        <div class="text-center">
+                                            <div class="loading-spinner w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                                            <p class="text-gray-600 font-medium">Loading AlphaFold Structure...</p>
+                                            <p id="loading-progress" class="text-sm text-gray-500 mt-2">Initializing Mol*...</p>
+                                            <div class="mt-4 bg-gray-200 rounded-full h-2 w-64 mx-auto">
+                                                <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Error State -->
+                                    <div id="error-state" class="absolute inset-0 flex items-center justify-center bg-red-50 hidden">
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                                            </div>
+                                            <p class="text-red-600 font-medium">Failed to load protein structure</p>
+                                            <p class="text-sm text-gray-600 mt-1">Network timeout or CORS issue</p>
+                                            <button onclick="loadMolstar()" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                                Retry Loading
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Controls -->
+                                <div class="mt-4 flex gap-2 flex-wrap">
+                                    <button id="highlight-btn" onclick="highlightResidue()" disabled 
+                                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                        <i class="fas fa-crosshairs mr-1"></i>Highlight Residue 72
+                                    </button>
+                                    <button onclick="resetView()" disabled id="reset-btn"
+                                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                        <i class="fas fa-undo mr-1"></i>Reset View
+                                    </button>
+                                    <button onclick="toggleSurface()" disabled id="surface-btn"
+                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                        <i class="fas fa-layer-group mr-1"></i>Surface
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                    <h4 class="font-medium text-blue-900 mb-2 text-sm flex items-center">
+                                        <i class="fas fa-info-circle mr-1"></i>Structural Context
+                                    </h4>
+                                    <div class="text-xs text-blue-800 space-y-1">
+                                        <p><strong>Protein:</strong> P04637 (TP53) • <strong>Residue:</strong> 72 (Pro→Arg)</p>
+                                        <p><strong>AlphaFold Confidence:</strong> <span class="text-green-600">Very High (pLDDT > 90)</span></p>
+                                        <p><strong>Region:</strong> DNA-binding domain • <strong>Impact:</strong> Critical for p53 function</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Structure -->
+                        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-xl font-semibold">Secondary Structure</h3>
+                                    <div class="flex gap-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">High</span>
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">ESM-lite</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- Helix -->
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="font-medium">Helix</span>
+                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ -0.020</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                                    <span>WT</span><span>45.0%</span>
+                                                </div>
+                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-purple-500 opacity-60" style="width: 45%"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                                    <span>Mut</span><span>43.0%</span>
+                                                </div>
+                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-purple-500" style="width: 43%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Sheet -->
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="font-medium">Sheet</span>
+                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ +0.020</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                                    <span>WT</span><span>25.0%</span>
+                                                </div>
+                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-yellow-500 opacity-60" style="width: 25%"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                                    <span>Mut</span><span>27.0%</span>
+                                                </div>
+                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-yellow-500" style="width: 27%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Coil -->
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="font-medium">Coil</span>
+                                            <span class="text-xs px-2 py-1 bg-gray-100 rounded">Δ +0.000</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                                    <span>WT</span><span>30.0%</span>
+                                                </div>
+                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-green-500 opacity-60" style="width: 30%"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                                    <span>Mut</span><span>30.0%</span>
+                                                </div>
+                                                <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-green-500" style="width: 30%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 text-xs text-gray-500 flex justify-between">
+                                    <span>ESM-lite prediction</span>
+                                    <span>Confidence: 82%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Tab Content (Structure, Genome, Traits) -->
+                <div id="content-structure" class="tab-content hidden">
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-xl font-semibold">Protein Secondary Structure</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="h-80 bg-gray-100 rounded-xl flex items-center justify-center">
+                                <div class="text-center">
+                                    <i class="fas fa-project-diagram text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600 mb-2">Structure Analysis</p>
+                                    <p class="text-sm text-gray-500">ESM-lite predictions and annotations</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-genome" class="tab-content hidden">
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-xl font-semibold">Genome Browser</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="h-80 bg-gray-100 rounded-xl flex items-center justify-center">
+                                <div class="text-center">
+                                    <i class="fas fa-dna text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600 mb-2">IGV.js Viewer</p>
+                                    <p class="text-sm text-gray-500">chr17:7,676,125-7,676,175</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-traits" class="tab-content hidden">
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-xl font-semibold">Genetic Traits</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-2">Trait</th>
+                                            <th class="text-left py-2">Score</th>
+                                            <th class="text-left py-2">Percentile</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-2">BMI</td>
+                                            <td class="py-2">0.34</td>
+                                            <td class="py-2">63rd</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-2">Height</td>
+                                            <td class="py-2">-0.12</td>
+                                            <td class="py-2">45th</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let molstarPlugin = null;
+        let loadingTimeout = null;
+        let surfaceVisible = false;
+
+        // Progress simulation for better UX
+        function simulateProgress() {
+            const progressBar = document.getElementById('progress-bar');
+            const loadingProgress = document.getElementById('loading-progress');
+            const progressSteps = [
+                { width: '20%', text: 'Loading Mol* library...' },
+                { width: '40%', text: 'Downloading AlphaFold structure...' },
+                { width: '60%', text: 'Parsing CIF file...' },
+                { width: '80%', text: 'Initializing 3D viewer...' },
+                { width: '100%', text: 'Ready!' }
+            ];
+            
+            let step = 0;
+            const interval = setInterval(() => {
+                if (step < progressSteps.length) {
+                    progressBar.style.width = progressSteps[step].width;
+                    loadingProgress.textContent = progressSteps[step].text;
+                    step++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800);
+        }
+
+        // Load script dynamically with promise
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // Main Mol* loading function
+        async function loadMolstar() {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const loadingStatus = document.getElementById('loading-status');
+            
+            // Reset states
+            loadingState.classList.remove('hidden');
+            errorState.classList.add('hidden');
+            loadingStatus.textContent = '(Loading...)';
+            
+            // Start progress simulation
+            simulateProgress();
+            
+            // Set timeout for slow loading
+            loadingTimeout = setTimeout(() => {
+                showError('Loading is taking longer than expected. Check your internet connection.');
+            }, 15000); // 15 second timeout
+
+            try {
+                // Dynamically load Mol* library
+                console.log('Loading Mol* library...');
+                await loadScript('https://molstar.org/viewer/molstar.js');
+                console.log('Mol* library loaded successfully');
+                
+                // Check if molstar is available
+                if (typeof molstar === 'undefined') {
+                    throw new Error('Mol* library failed to load');
+                }
+
+                // Initialize Mol* plugin
+                console.log('Initializing Mol* viewer...');
+                const container = document.getElementById('molstar-container');
+                molstarPlugin = await molstar.Viewer.create(container, {
+                    layoutShowControls: false,
+                    layoutShowSequence: false,
+                    layoutShowLog: false,
+                    layoutShowLeftPanel: false,
+                    viewportShowExpand: false,
+                    pdbProvider: 'rcsb',
+                    emdbProvider: 'rcsb'
+                });
+
+                console.log('Loading AlphaFold structure...');
+                // Load AlphaFold structure for P04637 (TP53)
+                await molstarPlugin.loadStructureFromUrl(
+                    'https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v4.cif',
+                    'mmcif'
+                );
+
+                // Success!
+                clearTimeout(loadingTimeout);
+                loadingState.classList.add('hidden');
+                loadingStatus.textContent = '(Loaded)';
+                
+                // Enable controls
+                document.getElementById('highlight-btn').disabled = false;
+                document.getElementById('reset-btn').disabled = false;
+                document.getElementById('surface-btn').disabled = false;
+                
+                console.log('Mol* viewer loaded successfully!');
+                
+            } catch (error) {
+                console.error('Mol* loading failed:', error);
+                clearTimeout(loadingTimeout);
+                showError('Failed to load protein structure: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const loadingStatus = document.getElementById('loading-status');
+            
+            loadingState.classList.add('hidden');
+            errorState.classList.remove('hidden');
+            loadingStatus.textContent = '(Error)';
+            
+            // Update error message if needed
+            const errorText = errorState.querySelector('p');
+            if (message) errorText.textContent = message;
+        }
+
+        async function highlightResidue() {
+            if (!molstarPlugin) return;
+            
+            try {
+                console.log('Highlighting residue 72...');
+                
+                // Create selection for residue 72
+                const selection = molstarPlugin.managers.structure.selection.Compiler.compile([
+                    { residue: { authSeqId: 72 } }
+                ]);
+                
+                // Apply selection
+                molstarPlugin.managers.structure.selection.set(selection);
+                
+                // Focus camera on selection
+                molstarPlugin.managers.camera.focusLoci(selection);
+                
+                // Visual feedback
+                const btn = document.getElementById('highlight-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check mr-1"></i>Highlighted!';
+                btn.classList.add('bg-green-600');
+                btn.classList.remove('bg-blue-600');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('bg-green-600');
+                    btn.classList.add('bg-blue-600');
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Highlighting failed:', error);
+                alert('Failed to highlight residue. This feature may not be available with this structure.');
+            }
+        }
+
+        function resetView() {
+            if (!molstarPlugin) return;
+            
+            try {
+                molstarPlugin.managers.camera.reset();
+                molstarPlugin.managers.structure.selection.clear();
+                console.log('View reset successfully');
+            } catch (error) {
+                console.error('Reset failed:', error);
+            }
+        }
+
+        function toggleSurface() {
+            if (!molstarPlugin) return;
+            
+            try {
+                const button = document.getElementById('surface-btn');
+                
+                if (surfaceVisible) {
+                    // Hide surface, show cartoon
+                    molstarPlugin.managers.structure.component.setRepresentation('cartoon');
+                    button.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Surface';
+                    surfaceVisible = false;
+                } else {
+                    // Show surface
+                    molstarPlugin.managers.structure.component.setRepresentation('surface');
+                    button.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Cartoon';
+                    surfaceVisible = true;
+                }
+                console.log('Surface toggled:', surfaceVisible);
+            } catch (error) {
+                console.error('Failed to toggle surface:', error);
+                alert('Surface toggle feature may not be available with this structure.');
+            }
+        }
+
+        // Page navigation functions
+        function loadDemo() {
+            document.getElementById('upload-page').classList.add('hidden');
+            document.getElementById('results-page').classList.remove('hidden');
+            
+            // Start loading Mol* when protein tab is shown
+            setTimeout(() => {
+                if (document.getElementById('content-protein').classList.contains('tab-content') && 
+                    !document.getElementById('content-protein').classList.contains('hidden')) {
+                    loadMolstar();
+                }
+            }, 500);
+        }
+
+        function showUpload() {
+            document.getElementById('results-page').classList.add('hidden');
+            document.getElementById('upload-page').classList.remove('hidden');
+        }
+
+        function showTab(tabName) {
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'text-indigo-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab content
+            document.getElementById('content-' + tabName).classList.remove('hidden');
+            
+            // Add active class to selected tab
+            const activeTab = document.getElementById('tab-' + tabName);
+            activeTab.classList.add('border-indigo-500', 'text-indigo-600');
+            activeTab.classList.remove('border-transparent', 'text-gray-500');
+            
+            // Initialize Mol* when protein tab is shown for the first time
+            if (tabName === 'protein' && !molstarPlugin) {
+                setTimeout(loadMolstar, 100);
+            }
+        }
+
+        // Initialize with protein tab active
+        window.addEventListener('DOMContentLoaded', function() {
+            showTab('protein');
+        });
+    </script>
+</body>
+</html>
