@@ -15,4 +15,27 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Ensure body is always scrollable */
+  overflow-y: scroll !important;
+  height: auto !important;
+}
+
+/* Ensure Mol* viewer doesn't interfere with page scrolling */
+.molstar-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.molstar-container canvas {
+  /* Prevent canvas from capturing scroll events outside its bounds */
+  pointer-events: auto;
+}
+
+/* Override any Mol* styles that might prevent scrolling */
+body[style*="overflow: hidden"] {
+  overflow-y: scroll !important;
+}
+
+html[style*="overflow: hidden"] {
+  overflow-y: scroll !important;
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FileText, Download, Trash2 } from "lucide-react";
+import { FileText, Download, Trash2, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ViewModeToggle } from "../../components/ViewModeToggle";
 import { OnboardingTour } from "../../components/OnboardingTour";
 import { GlossaryDrawer } from "../../components/GlossaryDrawer";
@@ -20,6 +21,7 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [usingFallback, setUsingFallback] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     // Load demo data on mount
@@ -139,6 +141,14 @@ export default function ResultsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.push('/')}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                aria-label="Go back to home"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
               <h1 className="text-xl font-semibold text-slate-900">
                 GeneLens Results
               </h1>

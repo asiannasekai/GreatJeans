@@ -37,14 +37,32 @@ export function MolstarViewer({
       loadMolstar();
     }
     
+    // Add global event listener to ensure page scrolling works
+    const handleGlobalWheel = (e: WheelEvent) => {
+      // If the wheel event is not over the molstar container, allow normal scrolling
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        return; // Allow default page scrolling
+      }
+    };
+
+    document.addEventListener('wheel', handleGlobalWheel, { passive: true });
+    
     return () => {
+      document.removeEventListener('wheel', handleGlobalWheel);
       if (molstarPlugin) {
         try {
+          // Cleanup scroll observer
+          if ((molstarPlugin as any).__scrollObserver) {
+            (molstarPlugin as any).__scrollObserver.disconnect();
+          }
           molstarPlugin.dispose();
         } catch (e) {
           console.error("Error disposing Molstar:", e);
         }
       }
+      // Ensure scrolling is restored on cleanup
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
     };
   }, [alphafoldUrl]);
 
@@ -111,16 +129,73 @@ export function MolstarViewer({
         layoutShowLeftPanel: false,
         viewportShowExpand: false,
         pdbProvider: 'rcsb',
-        emdbProvider: 'rcsb'
+        emdbProvider: 'rcsb',
+        // Allow page scrolling by preventing event capture outside the viewer
+        canvas3d: {
+          trackball: {
+            noScroll: true // This prevents the viewer from capturing scroll events
+          }
+        }
       });
 
       // Load AlphaFold structure
       await plugin.loadStructureFromUrl(alphafoldUrl, 'mmcif');
 
+      // Additional fix: Ensure scroll events don't get captured
+      const canvas = containerRef.current.querySelector('canvas');
+      if (canvas) {
+        // Prevent mouse wheel events from bubbling up when not over the canvas
+        canvas.addEventListener('wheel', (e) => {
+          // Only prevent default if the mouse is actually over the canvas
+          // and we're not trying to scroll the page
+          if (!e.shiftKey && !e.ctrlKey) {
+            e.stopPropagation();
+          }
+        }, { passive: false });
+
+        // Re-enable page scrolling when mouse leaves the viewer
+        canvas.addEventListener('mouseleave', () => {
+          document.body.style.overflow = 'auto';
+        });
+
+        // Disable page scrolling only when actively interacting with viewer
+        canvas.addEventListener('mouseenter', () => {
+          // Only disable scroll when actively dragging/rotating
+        });
+      }
+
       clearInterval(progressInterval);
       setMolstarPlugin(plugin);
       setLoading(false);
       setProgress(100);
+      
+      // Ensure page scrolling is re-enabled after Mol* loads
+      setTimeout(() => {
+        document.body.style.overflow = 'auto';
+        document.documentElement.style.overflow = 'auto';
+        
+        // Add a mutation observer to prevent Mol* from disabling scroll
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && 
+                (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+              const target = mutation.target as HTMLElement;
+              if (target === document.body || target === document.documentElement) {
+                if (target.style.overflow === 'hidden') {
+                  target.style.overflow = 'auto';
+                }
+              }
+            }
+          });
+        });
+        
+        observer.observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class'] });
+        
+        // Store observer for cleanup
+        (plugin as any).__scrollObserver = observer;
+      }, 100);
+      
       onLoad?.();
 
     } catch (err) {
@@ -176,8 +251,24 @@ export function MolstarViewer({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* 3D Viewer Container */}
-      <div className="relative h-64 bg-slate-100 rounded-lg overflow-hidden">
-        <div ref={containerRef} className="w-full h-full" />
+      <div 
+        className="molstar-container relative h-64 bg-slate-100 rounded-lg overflow-hidden"
+        onWheel={(e) => {
+          // Allow page scrolling when wheel event happens outside the actual viewer
+          if (!molstarPlugin || loading || error) {
+            return; // Let the event bubble up for page scrolling
+          }
+        }}
+      >
+        <div 
+          ref={containerRef} 
+          className="w-full h-full"
+          style={{
+            // Ensure the viewer container doesn't interfere with page scrolling
+            touchAction: 'pan-x pan-y',
+            userSelect: 'none'
+          }}
+        />
         
         {/* Loading State */}
         {loading && (
