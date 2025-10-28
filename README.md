@@ -1,6 +1,6 @@
 # GreatJeans
 
-FastAPI demo genomics backend for hackathon use. Educational only – not medical or diagnostic.
+FastAPI demo genomics backend from MIT hackathon. Educational only – not medical or diagnostic.
 
 ## Features
 - Upload consumer DNA raw data (.txt 23andMe style, .vcf, .vcf.gz)
