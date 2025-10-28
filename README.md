@@ -39,5 +39,3 @@ See tests and `backend/models.py` for schema. Includes keys: qc, genome_window, 
 ## Disclaimer
 Educational use only; not for clinical or diagnostic purposes. No medical advice.
 
-## License
-MIT (add if needed)
